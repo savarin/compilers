@@ -6,7 +6,7 @@ def format(node: model.Node) -> str:
         return f"{format(node.left)} {node.operator} {format(node.right)}"
 
     elif isinstance(node, model.Grouping):
-        return f"({node.expression})"
+        return f"({format(node.expression)})"
 
     elif isinstance(node, model.Literal):
         return str(node.value)
