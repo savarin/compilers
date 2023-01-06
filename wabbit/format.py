@@ -2,43 +2,43 @@ from model import *
 
 
 def format(node: Node) -> str:
-    if isinstance(node, Float):
-        return node.value
+    match node:
+        case Float(value):
+            return value
 
-    elif isinstance(node, Integer):
-        return node.value
+        case Integer(value):
+            return value
 
-    elif isinstance(node, Name):
-        return node.text
+        case Name(text):
+            return text
 
-    elif isinstance(node, TypeName):
-        return node.text
+        case TypeName(text):
+            return text
 
-    elif isinstance(node, Assign):
-        return f"{format(node.name)} = {format(node.value)};\n"
+        case Assign(name, value):
+            return f"{format(name)} = {format(value)};\n"
 
-    elif isinstance(node, Binary):
-        return f"{format(node.left)} {node.operator} {format(node.right)}"
+        case Binary(left, operator, right):
+            return f"{format(left)} {operator} {format(right)}"
 
-    elif isinstance(node, Grouping):
-        return f"({format(node.expression)})"
+        case Grouping(expression):
+            return f"({format(expression)})"
 
-    elif isinstance(node, Unary):
-        return f"{node.operator}{format(node.right)}"
+        case Unary(operator, right):
+            return f"{operator}{format(right)}"
 
-    elif isinstance(node, Print):
-        return f"print {format(node.expression)};\n"
+        case Print(expression):
+            return f"print {format(expression)};\n"
 
-    elif isinstance(node, ConstantDeclaration):
-        constant_type = f" {format(node.constant_type)}" if node.constant_type else ""
-        return (
-            f"const {format(node.name)}{constant_type} = {format(node.initializer)};\n"
-        )
+        case ConstantDeclaration(name, constant_type, initializer):
+            constant_type = f" {format(constant_type)}" if constant_type else ""
+            return f"const {format(name)}{constant_type} = {format(initializer)};\n"
 
-    elif isinstance(node, VariableDeclaration):
-        variable_type = f" {format(node.variable_type)}" if node.variable_type else ""
-        initializer = f" = {format(node.initializer)}" if node.initializer else ""
+        case VariableDeclaration(name, variable_type, initializer):
+            variable_type = f" {format(variable_type)}" if variable_type else ""
+            initializer = f" = {format(initializer)}" if initializer else ""
 
-        return f"var {format(node.name)}{variable_type}{initializer};\n"
+            return f"var {format(name)}{variable_type}{initializer};\n"
 
-    raise Exception("Exhaustive switch error.")
+        case _:
+            raise Exception("Exhaustive switch error.")
