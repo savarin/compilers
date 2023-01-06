@@ -1,60 +1,61 @@
-import abc
+from typing import Optional
+from dataclasses import dataclass
 
 
 class Node:
     pass
 
 
-class Assign(Node):
-    def __init__(self, expression, value):
-        self.expression = expression
-        self.value = value
+class Expression(Node):
+    pass
 
 
-class Binary(Node):
-    def __init__(self, left, operator, right):
-        self.left = left
-        self.operator = operator
-        self.right = right
+class Statement(Node):
+    pass
 
 
-class Constant(Node):
-    def __init__(self, expression):
-        self.expression = expression
+# Types
 
 
-class Grouping(Node):
-    def __init__(self, expression):
-        self.expression = expression
+@dataclass
+class Integer(Expression):
+    value: str
 
 
-class Literal(Node):
-    def __init__(self, value):
-        self.value = value
+@dataclass
+class Float(Expression):
+    value: str
 
 
-class Name(Node):
-    def __init__(self, name):
-        self.name = name
+# Expressions
 
 
-class Print(Node):
-    def __init__(self, value):
-        self.value = value
+@dataclass
+class Binary(Expression):
+    left: Expression
+    operator: str
+    right: Expression
 
 
-class Type(Node):
-    def __init__(self, expression, type_class):
-        self.expression = expression
-        self.type = type_class
+@dataclass
+class Grouping(Expression):
+    expression: Expression
 
 
-class Unary(Node):
-    def __init__(self, operator, right):
-        self.operator = operator
-        self.right = right
+# Statements
 
 
-class Variable(Node):
-    def __init__(self, expression):
-        self.expression = expression
+@dataclass
+class Print(Statement):
+    expression: Expression
+
+
+@dataclass
+class Name(Expression):
+    text: str
+
+
+@dataclass
+class Unary(Expression):
+    operator: str
+    right: Expression
