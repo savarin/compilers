@@ -36,3 +36,23 @@ if __name__ == "__main__":
             Print(Binary(Float("2.0"), "-", Binary(Float("3.0"), "/", Float("4.0"))))
         ),
     )
+
+    # program 3
+    print(format(ConstantDeclaration(Name("pi"), None, Float("3.14159"))), end="")
+    print(
+        format(
+            ConstantDeclaration(
+                Name("tau"), None, Binary(Float("2.0"), "*", Name("pi"))
+            )
+        ),
+        end="",
+    )
+    print(format(VariableDeclaration(Name("radius"), None, Float("4.0"))), end="")
+    print(
+        format(VariableDeclaration(Name("perimeter"), TypeName("float"), None)), end=""
+    )
+    print(
+        format(Assign(Name("perimeter"), Binary(Name("tau"), "*", Name("radius")))),
+        end="",
+    )
+    print(format(Print(Name("perimeter"))), end="")

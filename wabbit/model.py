@@ -14,7 +14,15 @@ class Statement(Node):
     pass
 
 
-# Types
+class Declaration(Node):
+    pass
+
+
+class Type(Node):
+    pass
+
+
+# Primitives
 
 
 @dataclass
@@ -27,7 +35,26 @@ class Float(Expression):
     value: str
 
 
+# Names
+
+
+@dataclass
+class Name(Expression):
+    text: str
+
+
+@dataclass
+class TypeName(Expression):
+    text: str
+
+
 # Expressions
+
+
+@dataclass
+class Assign(Expression):
+    name: Name
+    value: Expression
 
 
 @dataclass
@@ -42,6 +69,12 @@ class Grouping(Expression):
     expression: Expression
 
 
+@dataclass
+class Unary(Expression):
+    operator: str
+    right: Expression
+
+
 # Statements
 
 
@@ -50,12 +83,18 @@ class Print(Statement):
     expression: Expression
 
 
-@dataclass
-class Name(Expression):
-    text: str
+# Declarations
 
 
 @dataclass
-class Unary(Expression):
-    operator: str
-    right: Expression
+class ConstantDeclaration(Statement):
+    name: Name
+    constant_type: Optional[TypeName]
+    initializer: Expression
+
+
+@dataclass
+class VariableDeclaration(Statement):
+    name: Name
+    variable_type: Optional[TypeName]
+    initializer: Optional[Expression]
