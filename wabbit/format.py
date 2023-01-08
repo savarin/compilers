@@ -26,6 +26,9 @@ def format(node: Union[Expr, Statem, None]) -> str:
         case Binary(left, operator, right):
             return f"{format(left)} {operator.value} {format(right)}"
 
+        case Call(callee, arguments):
+            return f"{format(callee)}({', '.join([format(argument) for argument in arguments])})"
+
         case Grouping(expression):
             return f"({format(expression)})"
 
@@ -56,6 +59,15 @@ def format(node: Union[Expr, Statem, None]) -> str:
         case Expression(expression):
             return f"{format(expression)};\n"
 
+        case Function(name, parameters, parameter_types, return_type, body):
+            parameters_string = ", ".join(
+                [
+                    format(parameter) + " " + format(parameter_type)
+                    for parameter, parameter_type in zip(parameters, parameter_types)
+                ]
+            )
+            return f"func {format(name)}({parameters_string}) {format(return_type)} {format(body)}"
+
         case If(condition, then_branch, else_branch):
             if_then_string = f"if {format(condition)} {format(then_branch)}"
 
@@ -70,6 +82,9 @@ def format(node: Union[Expr, Statem, None]) -> str:
 
         case Print(expression):
             return f"print {format(expression)};\n"
+
+        case Return(expression):
+            return f"return {format(expression)};\n"
 
         case While(condition, body):
             return f"while {format(condition)} {format(body)}"

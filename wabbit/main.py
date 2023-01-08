@@ -168,5 +168,26 @@ if __name__ == "__main__":
                     ),
                 ],
             ),
+        ),
+        True,
+    )
+
+    # program 8
+    p(
+        Function(
+            Name("add"),
+            [Name("x"), Name("y")],
+            [Type(TypeEnum.INT), Type(TypeEnum.INT)],
+            Type(TypeEnum.INT),
+            Block([Return(Binary(Name("x"), OperatorEnum.PLUS, Name("y")))]),
         )
     )
+    p(
+        Declaration(
+            Name("result"),
+            DeclarationEnum.VAR,
+            None,
+            Call(Name("add"), [Integer("2"), Integer("3")]),
+        )
+    )
+    p(Print(Name("result")))

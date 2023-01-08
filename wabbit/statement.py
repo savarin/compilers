@@ -46,6 +46,15 @@ class Expression(Statem):
 
 
 @dataclasses.dataclass
+class Function(Statem):
+    name: expression.Name
+    parameters: List[expression.Name]
+    parameter_types: List[expression.Type]
+    return_type: expression.Type
+    body: Statem
+
+
+@dataclasses.dataclass
 class If(Statem):
     condition: expression.Expr
     then_branch: Statem
@@ -54,6 +63,11 @@ class If(Statem):
 
 @dataclasses.dataclass
 class Print(Statem):
+    expression: expression.Expr
+
+
+@dataclasses.dataclass
+class Return(Statem):
     expression: expression.Expr
 
 
