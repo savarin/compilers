@@ -24,13 +24,13 @@ def format(node: Union[Expr, Statem, None]) -> str:
             return f"{format(name)} = {format(value)}"
 
         case Binary(left, operator, right):
-            return f"{format(left)} {operator} {format(right)}"
+            return f"{format(left)} {operator.value} {format(right)}"
 
         case Grouping(expression):
             return f"({format(expression)})"
 
         case Unary(operator, right):
-            return f"{operator}{format(right)}"
+            return f"{operator.value}{format(right)}"
 
         case Declaration(name, declaration_type, value_type, initializer):
             declaration = declaration_type.value

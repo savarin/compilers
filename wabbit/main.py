@@ -8,15 +8,30 @@ if __name__ == "__main__":
     print(format(Print(Integer("42"))))
 
     # # program 2
-    print(format(Print(Binary(Integer("2"), "+", Integer("3")))), end="")
-    print(format(Print(Binary(Unary("-", Integer("2")), "+", Integer("3")))), end="")
+    print(format(Print(Binary(Integer("2"), OperatorEnum.PLUS, Integer("3")))), end="")
+    print(
+        format(
+            Print(
+                Binary(
+                    Unary(OperatorEnum.MINUS, Integer("2")),
+                    OperatorEnum.PLUS,
+                    Integer("3"),
+                )
+            )
+        ),
+        end="",
+    )
     print(
         format(
             Print(
                 Binary(
                     Integer("2"),
-                    "+",
-                    Binary(Integer("3"), "*", Unary("-", Integer("4"))),
+                    OperatorEnum.PLUS,
+                    Binary(
+                        Integer("3"),
+                        OperatorEnum.TIMES,
+                        Unary(OperatorEnum.MINUS, Integer("4")),
+                    ),
                 )
             )
         ),
@@ -26,7 +41,9 @@ if __name__ == "__main__":
         format(
             Print(
                 Binary(
-                    Grouping(Binary(Integer("2"), "+", Integer("3"))), "*", Integer("4")
+                    Grouping(Binary(Integer("2"), OperatorEnum.PLUS, Integer("3"))),
+                    OperatorEnum.TIMES,
+                    Integer("4"),
                 )
             )
         ),
@@ -34,7 +51,13 @@ if __name__ == "__main__":
     )
     print(
         format(
-            Print(Binary(Float("2.0"), "-", Binary(Float("3.0"), "/", Float("4.0"))))
+            Print(
+                Binary(
+                    Float("2.0"),
+                    OperatorEnum.MINUS,
+                    Binary(Float("3.0"), OperatorEnum.DIVIDE, Float("4.0")),
+                )
+            )
         ),
     )
 
@@ -49,7 +72,7 @@ if __name__ == "__main__":
                 Name("tau"),
                 DeclarationEnum.CONST,
                 None,
-                Binary(Float("2.0"), "*", Name("pi")),
+                Binary(Float("2.0"), OperatorEnum.MINUS, Name("pi")),
             )
         ),
         end="",
@@ -69,9 +92,16 @@ if __name__ == "__main__":
     print(
         format(
             Expression(
-                Assign(Name("perimeter"), Binary(Name("tau"), "*", Name("radius")))
+                Assign(
+                    Name("perimeter"),
+                    Binary(Name("tau"), OperatorEnum.TIMES, Name("radius")),
+                )
             )
         ),
         end="",
     )
     print(format(Print(Name("perimeter"))))
+
+    # program 4
+    print(format(Print(Boolean("true"))), end="")
+    print(format(Print(Binary(Integer("1"), OperatorEnum.EQ_EQ, Integer("1")))))

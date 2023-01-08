@@ -10,7 +10,14 @@ class TypeEnum(enum.Enum):
     BOOL = "bool"
     FLOAT = "float"
     INT = "int"
-    STRING = "str"
+
+
+class OperatorEnum(enum.Enum):
+    PLUS = "+"
+    MINUS = "-"
+    TIMES = "*"
+    DIVIDE = "/"
+    EQ_EQ = "=="
 
 
 # Primitives
@@ -56,7 +63,7 @@ class Assign(Expr):
 @dataclasses.dataclass
 class Binary(Expr):
     left: Expr
-    operator: str
+    operator: OperatorEnum
     right: Expr
 
 
@@ -67,5 +74,5 @@ class Grouping(Expr):
 
 @dataclasses.dataclass
 class Unary(Expr):
-    operator: str
+    operator: OperatorEnum
     right: Expr
