@@ -1,8 +1,16 @@
 import dataclasses
+import enum
 
 
 class Expr:
     pass
+
+
+class TypeEnum(enum.Enum):
+    BOOL = "bool"
+    FLOAT = "float"
+    INT = "int"
+    STRING = "str"
 
 
 # Primitives
@@ -33,7 +41,7 @@ class Name(Expr):
 
 @dataclasses.dataclass
 class Type(Expr):
-    text: str
+    type_enum: TypeEnum
 
 
 # Expressions

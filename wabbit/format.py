@@ -17,8 +17,8 @@ def format(node: Union[Expr, Statem, None]) -> str:
         case Name(text):
             return text
 
-        case Type(text):
-            return text
+        case Type(type_enum):
+            return type_enum.value
 
         case Assign(name, value):
             return f"{format(name)} = {format(value)}"
@@ -33,7 +33,7 @@ def format(node: Union[Expr, Statem, None]) -> str:
             return f"{operator}{format(right)}"
 
         case Declaration(name, declaration_type, value_type, initializer):
-            declaration = declaration_type.value.lower()
+            declaration = declaration_type.value
             value = f" {format(value_type)}" if value_type is not None else ""
             init = f" = {format(initializer)}" if initializer else ""
 

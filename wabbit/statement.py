@@ -5,9 +5,9 @@ import enum
 import expression
 
 
-class DeclarationType(enum.Enum):
-    CONST = "CONST"
-    VAR = "VAR"
+class DeclarationEnum(enum.Enum):
+    CONST = "const"
+    VAR = "var"
 
 
 class Statem:
@@ -20,7 +20,7 @@ class Statem:
 @dataclasses.dataclass
 class Declaration(Statem):
     name: expression.Name
-    declaration_type: DeclarationType
+    declaration_enum: DeclarationEnum
     value_type: Optional[expression.Type]
     initializer: Optional[expression.Expr]
 

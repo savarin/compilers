@@ -40,14 +40,14 @@ if __name__ == "__main__":
 
     # program 3
     print(
-        format(Declaration(Name("pi"), DeclarationType.CONST, None, Float("3.14159"))),
+        format(Declaration(Name("pi"), DeclarationEnum.CONST, None, Float("3.14159"))),
         end="",
     )
     print(
         format(
             Declaration(
                 Name("tau"),
-                DeclarationType.CONST,
+                DeclarationEnum.CONST,
                 None,
                 Binary(Float("2.0"), "*", Name("pi")),
             )
@@ -55,12 +55,14 @@ if __name__ == "__main__":
         end="",
     )
     print(
-        format(Declaration(Name("radius"), DeclarationType.VAR, None, Float("4.0"))),
+        format(Declaration(Name("radius"), DeclarationEnum.VAR, None, Float("4.0"))),
         end="",
     )
     print(
         format(
-            Declaration(Name("perimeter"), DeclarationType.VAR, Type("float"), None)
+            Declaration(
+                Name("perimeter"), DeclarationEnum.VAR, Type(TypeEnum.FLOAT), None
+            )
         ),
         end="",
     )
