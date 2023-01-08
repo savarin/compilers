@@ -144,9 +144,53 @@ if __name__ == "__main__":
         format(
             If(
                 Binary(Name("a"), OperatorEnum.LESS, Name("b")),
-                Expression(Assign(Name("minval"), Name("a"))),
-                Expression(Assign(Name("minval"), Name("b"))),
+                Block([Expression(Assign(Name("minval"), Name("a")))]),
+                Block([Expression(Assign(Name("minval"), Name("b")))]),
             )
         )
     )
     print(format(Print(Name("minval"))))
+
+    # program 6
+    print(
+        format(
+            Declaration(
+                Name("x"), DeclarationEnum.VAR, Type(TypeEnum.INT), Integer("1")
+            )
+        ),
+        end="",
+    )
+    print(
+        format(
+            Declaration(
+                Name("fact"), DeclarationEnum.VAR, Type(TypeEnum.INT), Integer("1")
+            )
+        ),
+        end="",
+    )
+    print(
+        format(
+            While(
+                Binary(Name("x"), OperatorEnum.LESS, Integer("11")),
+                Block(
+                    [
+                        Expression(
+                            Binary(
+                                Name("fact"),
+                                OperatorEnum.EQ,
+                                Binary(Name("fact"), OperatorEnum.TIMES, Name("x")),
+                            )
+                        ),
+                        Expression(
+                            Binary(
+                                Name("x"),
+                                OperatorEnum.EQ,
+                                Binary(Name("x"), OperatorEnum.PLUS, Integer("1")),
+                            )
+                        ),
+                        Print(Name("fact")),
+                    ]
+                ),
+            )
+        )
+    )

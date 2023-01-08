@@ -32,6 +32,14 @@ def format(node: Union[Expr, Statem, None]) -> str:
         case Unary(operator, right):
             return f"{operator.value}{format(right)}"
 
+        case Block(statements):
+            result = "{\n"
+
+            for statement in statements:
+                result += "    " + format(statement)
+
+            return result + "}"
+
         case Declaration(name, declaration_type, value_type, initializer):
             declaration = declaration_type.value
             value = f" {format(value_type)}" if value_type is not None else ""
@@ -44,17 +52,16 @@ def format(node: Union[Expr, Statem, None]) -> str:
 
         case If(condition, then_branch, else_branch):
             else_string = (
-                f" else {{\n    {format(else_branch)};\n}}"
-                if else_branch is not None
-                else ""
+                f" else {format(else_branch)}" if else_branch is not None else ""
             )
 
-            return (
-                f"if {format(condition)} {{\n" f"    {format(then_branch)};\n" f"}}"
-            ) + else_string
+            return f"if {format(condition)} {format(then_branch)}" + else_string
 
         case Print(expression):
             return f"print {format(expression)};\n"
+
+        case While(condition, body):
+            return f"while {format(condition)} {format(body)}"
 
         case _:
             raise Exception("Exhaustive switch error.")

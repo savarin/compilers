@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 import dataclasses
 import enum
 
@@ -15,6 +15,11 @@ class Statem:
 
 
 # Statements
+
+
+@dataclasses.dataclass
+class Block(Statem):
+    statements: List[Statem]
 
 
 @dataclasses.dataclass
@@ -40,3 +45,9 @@ class If(Statem):
 @dataclasses.dataclass
 class Print(Statem):
     expression: expression.Expr
+
+
+@dataclasses.dataclass
+class While(Statem):
+    condition: expression.Expr
+    body: Statem
