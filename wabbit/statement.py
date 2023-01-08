@@ -1,7 +1,13 @@
 from typing import Optional
 import dataclasses
+import enum
 
 import expression
+
+
+class DeclarationType(enum.Enum):
+    CONST = "CONST"
+    VAR = "VAR"
 
 
 class Statement:
@@ -12,22 +18,13 @@ class Statement:
 
 
 @dataclasses.dataclass
+class Declaration(Statement):
+    name: expression.Name
+    declaration_type: DeclarationType
+    value_type: Optional[expression.Type]
+    initializer: Optional[expression.Expression]
+
+
+@dataclasses.dataclass
 class Print(Statement):
     expression: expression.Expression
-
-
-# Declarations
-
-
-@dataclasses.dataclass
-class ConstantDeclaration(Statement):
-    name: expression.Name
-    constant_type: Optional[expression.TypeName]
-    initializer: expression.Expression
-
-
-@dataclasses.dataclass
-class VariableDeclaration(Statement):
-    name: expression.Name
-    variable_type: Optional[expression.TypeName]
-    initializer: Optional[expression.Expression]

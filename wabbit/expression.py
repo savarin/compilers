@@ -32,7 +32,7 @@ class Name(Expression):
 
 
 @dataclasses.dataclass
-class TypeName(Expression):
+class Type(Expression):
     text: str
 
 

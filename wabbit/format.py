@@ -17,7 +17,7 @@ def format(node: Union[Expression, Statement, None]) -> str:
         case Name(text):
             return text
 
-        case TypeName(text):
+        case Type(text):
             return text
 
         case Assign(name, value):
@@ -35,19 +35,12 @@ def format(node: Union[Expression, Statement, None]) -> str:
         case Print(expression):
             return f"print {format(expression)};\n"
 
-        case ConstantDeclaration(name, constant_type, initializer):
-            type_string = (
-                f" {format(constant_type)}" if constant_type is not None else ""
-            )
-            return f"const {format(name)}{type_string} = {format(initializer)};\n"
+        case Declaration(name, declaration_type, value_type, initializer):
+            declaration = declaration_type.value.lower()
+            value = f" {format(value_type)}" if value_type is not None else ""
+            init = f" = {format(initializer)}" if initializer else ""
 
-        case VariableDeclaration(name, variable_type, initializer):
-            type_string = (
-                f" {format(variable_type)}" if variable_type is not None else ""
-            )
-            init_string = f" = {format(initializer)}" if initializer else ""
-
-            return f"var {format(name)}{type_string}{init_string};\n"
+            return f"{declaration} {format(name)}{value}{init};\n"
 
         case _:
             raise Exception("Exhaustive switch error.")
