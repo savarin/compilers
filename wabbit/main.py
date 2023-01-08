@@ -55,4 +55,4 @@ if __name__ == "__main__":
         format(Assign(Name("perimeter"), Binary(Name("tau"), "*", Name("radius")))),
         end="",
     )
-    print(format(Print(Name("perimeter"))), end="")
+    print(format(Print(Name("perimeter"))))

@@ -3,6 +3,9 @@ from model import *
 
 def format(node: Node) -> str:
     match node:
+        case Boolean(value):
+            return value
+
         case Float(value):
             return value
 

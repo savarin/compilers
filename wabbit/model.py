@@ -24,14 +24,18 @@ class Type(Node):
 
 # Primitives
 
-
 @dataclass
-class Integer(Expression):
+class Boolean(Expression):
     value: str
 
 
 @dataclass
 class Float(Expression):
+    value: str
+
+
+@dataclass
+class Integer(Expression):
     value: str
 
 
