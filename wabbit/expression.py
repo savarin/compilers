@@ -1,7 +1,7 @@
 import dataclasses
 
 
-class Expression:
+class Expr:
     pass
 
 
@@ -9,17 +9,17 @@ class Expression:
 
 
 @dataclasses.dataclass
-class Boolean(Expression):
+class Boolean(Expr):
     value: str
 
 
 @dataclasses.dataclass
-class Float(Expression):
+class Float(Expr):
     value: str
 
 
 @dataclasses.dataclass
-class Integer(Expression):
+class Integer(Expr):
     value: str
 
 
@@ -27,12 +27,12 @@ class Integer(Expression):
 
 
 @dataclasses.dataclass
-class Name(Expression):
+class Name(Expr):
     text: str
 
 
 @dataclasses.dataclass
-class Type(Expression):
+class Type(Expr):
     text: str
 
 
@@ -40,24 +40,24 @@ class Type(Expression):
 
 
 @dataclasses.dataclass
-class Assign(Expression):
+class Assign(Expr):
     name: Name
-    value: Expression
+    value: Expr
 
 
 @dataclasses.dataclass
-class Binary(Expression):
-    left: Expression
+class Binary(Expr):
+    left: Expr
     operator: str
-    right: Expression
+    right: Expr
 
 
 @dataclasses.dataclass
-class Grouping(Expression):
-    expression: Expression
+class Grouping(Expr):
+    expression: Expr
 
 
 @dataclasses.dataclass
-class Unary(Expression):
+class Unary(Expr):
     operator: str
-    right: Expression
+    right: Expr

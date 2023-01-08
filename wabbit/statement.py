@@ -10,7 +10,7 @@ class DeclarationType(enum.Enum):
     VAR = "VAR"
 
 
-class Statement:
+class Statem:
     pass
 
 
@@ -18,13 +18,18 @@ class Statement:
 
 
 @dataclasses.dataclass
-class Declaration(Statement):
+class Declaration(Statem):
     name: expression.Name
     declaration_type: DeclarationType
     value_type: Optional[expression.Type]
-    initializer: Optional[expression.Expression]
+    initializer: Optional[expression.Expr]
 
 
 @dataclasses.dataclass
-class Print(Statement):
-    expression: expression.Expression
+class Expression(Statem):
+    expression: expression.Expr
+
+
+@dataclasses.dataclass
+class Print(Statem):
+    expression: expression.Expr

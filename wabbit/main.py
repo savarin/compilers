@@ -65,7 +65,11 @@ if __name__ == "__main__":
         end="",
     )
     print(
-        format(Assign(Name("perimeter"), Binary(Name("tau"), "*", Name("radius")))),
+        format(
+            Expression(
+                Assign(Name("perimeter"), Binary(Name("tau"), "*", Name("radius")))
+            )
+        ),
         end="",
     )
     print(format(Print(Name("perimeter"))))
