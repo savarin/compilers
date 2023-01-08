@@ -116,3 +116,37 @@ if __name__ == "__main__":
         end="",
     )
     print(format(Print(Unary(OperatorEnum.NOT, Boolean("false")))))
+
+    # program 5
+    print(
+        format(
+            Declaration(
+                Name("a"), DeclarationEnum.VAR, Type(TypeEnum.INT), Integer("2")
+            )
+        ),
+        end="",
+    )
+    print(
+        format(
+            Declaration(
+                Name("b"), DeclarationEnum.VAR, Type(TypeEnum.INT), Integer("3")
+            )
+        ),
+        end="",
+    )
+    print(
+        format(
+            Declaration(Name("minval"), DeclarationEnum.VAR, Type(TypeEnum.INT), None)
+        ),
+        end="",
+    )
+    print(
+        format(
+            If(
+                Binary(Name("a"), OperatorEnum.LESS, Name("b")),
+                Expression(Assign(Name("minval"), Name("a"))),
+                Expression(Assign(Name("minval"), Name("b"))),
+            )
+        )
+    )
+    print(format(Print(Name("minval"))))

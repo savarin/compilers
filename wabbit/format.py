@@ -42,6 +42,17 @@ def format(node: Union[Expr, Statem, None]) -> str:
         case Expression(expression):
             return f"{format(expression)};\n"
 
+        case If(condition, then_branch, else_branch):
+            else_string = (
+                f" else {{\n    {format(else_branch)};\n}}"
+                if else_branch is not None
+                else ""
+            )
+
+            return (
+                f"if {format(condition)} {{\n" f"    {format(then_branch)};\n" f"}}"
+            ) + else_string
+
         case Print(expression):
             return f"print {format(expression)};\n"
 

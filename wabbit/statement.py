@@ -31,5 +31,12 @@ class Expression(Statem):
 
 
 @dataclasses.dataclass
+class If(Statem):
+    condition: expression.Expr
+    then_branch: Statem
+    else_branch: Optional[Statem]
+
+
+@dataclasses.dataclass
 class Print(Statem):
     expression: expression.Expr
