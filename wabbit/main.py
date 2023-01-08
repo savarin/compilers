@@ -104,4 +104,15 @@ if __name__ == "__main__":
 
     # program 4
     print(format(Print(Boolean("true"))), end="")
-    print(format(Print(Binary(Integer("1"), OperatorEnum.EQ_EQ, Integer("1")))))
+    print(format(Print(Binary(Integer("1"), OperatorEnum.EQ_EQ, Integer("1")))), end="")
+    print(format(Print(Binary(Integer("0"), OperatorEnum.LESS, Integer("1")))), end="")
+    print(format(Print(Binary(Integer("1"), OperatorEnum.GREAT, Integer("0")))), end="")
+    print(
+        format(Print(Binary(Boolean("true"), OperatorEnum.AND, Boolean("true")))),
+        end="",
+    )
+    print(
+        format(Print(Binary(Boolean("false"), OperatorEnum.OR, Boolean("true")))),
+        end="",
+    )
+    print(format(Print(Unary(OperatorEnum.NOT, Boolean("false")))))

@@ -17,7 +17,15 @@ class OperatorEnum(enum.Enum):
     MINUS = "-"
     TIMES = "*"
     DIVIDE = "/"
+    EQ = "="
     EQ_EQ = "=="
+    LESS = "<"
+    LESS_EQ = "<="
+    GREAT = ">"
+    GREAT_EQ = ">="
+    AND = "&&"
+    OR = "||"
+    NOT = "!"
 
 
 # Primitives
