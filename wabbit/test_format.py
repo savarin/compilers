@@ -1,5 +1,6 @@
 from format import format
-from model import *
+from expression import *
+from statement import *
 
 
 def test_format():

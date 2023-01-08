@@ -1,5 +1,6 @@
 from format import format
-from model import *
+from expression import *
+from statement import *
 
 
 if __name__ == "__main__":

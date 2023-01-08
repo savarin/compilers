@@ -1,7 +1,9 @@
-from model import *
+from typing import Union
+from expression import *
+from statement import *
 
 
-def format(node: Node) -> str:
+def format(node: Union[Expression, Statement, None]) -> str:
     match node:
         case Boolean(value):
             return value
@@ -34,14 +36,18 @@ def format(node: Node) -> str:
             return f"print {format(expression)};\n"
 
         case ConstantDeclaration(name, constant_type, initializer):
-            constant_type = f" {format(constant_type)}" if constant_type else ""
-            return f"const {format(name)}{constant_type} = {format(initializer)};\n"
+            type_string = (
+                f" {format(constant_type)}" if constant_type is not None else ""
+            )
+            return f"const {format(name)}{type_string} = {format(initializer)};\n"
 
         case VariableDeclaration(name, variable_type, initializer):
-            variable_type = f" {format(variable_type)}" if variable_type else ""
-            initializer = f" = {format(initializer)}" if initializer else ""
+            type_string = (
+                f" {format(variable_type)}" if variable_type is not None else ""
+            )
+            init_string = f" = {format(initializer)}" if initializer else ""
 
-            return f"var {format(name)}{variable_type}{initializer};\n"
+            return f"var {format(name)}{type_string}{init_string};\n"
 
         case _:
             raise Exception("Exhaustive switch error.")
