@@ -38,7 +38,13 @@ def format(node: Union[Expr, Statem, None]) -> str:
             for statement in statements:
                 result += "    " + format(statement)
 
-            return result + "}"
+            return result + "}\n"
+
+        case Break():
+            return "break;\n"
+
+        case Continue():
+            return "continue;\n"
 
         case Declaration(name, declaration_type, value_type, initializer):
             declaration = declaration_type.value
@@ -51,11 +57,16 @@ def format(node: Union[Expr, Statem, None]) -> str:
             return f"{format(expression)};\n"
 
         case If(condition, then_branch, else_branch):
+            if_then_string = f"if {format(condition)} {format(then_branch)}"
+
+            if else_branch is not None:
+                if_then_string = if_then_string.rstrip("\n")
+
             else_string = (
                 f" else {format(else_branch)}" if else_branch is not None else ""
             )
 
-            return f"if {format(condition)} {format(then_branch)}" + else_string
+            return if_then_string + else_string
 
         case Print(expression):
             return f"print {format(expression)};\n"

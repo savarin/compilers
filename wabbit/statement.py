@@ -23,6 +23,16 @@ class Block(Statem):
 
 
 @dataclasses.dataclass
+class Break(Statem):
+    ...
+
+
+@dataclasses.dataclass
+class Continue(Statem):
+    ...
+
+
+@dataclasses.dataclass
 class Declaration(Statem):
     name: expression.Name
     declaration_enum: DeclarationEnum

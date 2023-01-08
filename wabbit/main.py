@@ -3,110 +3,88 @@ from expression import *
 from statement import *
 
 
+def p(statement, newline=False):
+    if newline:
+        return print(format(statement))
+
+    return print(format(statement), end="")
+
+
 if __name__ == "__main__":
     # program 1
-    print(format(Print(Integer("42"))))
+    p(Print(Integer("42")), True)
 
     # # program 2
-    print(format(Print(Binary(Integer("2"), OperatorEnum.PLUS, Integer("3")))), end="")
-    print(
-        format(
-            Print(
+    p(Print(Binary(Integer("2"), OperatorEnum.PLUS, Integer("3"))))
+    p(
+        Print(
+            Binary(
+                Unary(OperatorEnum.MINUS, Integer("2")),
+                OperatorEnum.PLUS,
+                Integer("3"),
+            )
+        )
+    )
+    p(
+        Print(
+            Binary(
+                Integer("2"),
+                OperatorEnum.PLUS,
                 Binary(
-                    Unary(OperatorEnum.MINUS, Integer("2")),
-                    OperatorEnum.PLUS,
                     Integer("3"),
-                )
-            )
-        ),
-        end="",
-    )
-    print(
-        format(
-            Print(
-                Binary(
-                    Integer("2"),
-                    OperatorEnum.PLUS,
-                    Binary(
-                        Integer("3"),
-                        OperatorEnum.TIMES,
-                        Unary(OperatorEnum.MINUS, Integer("4")),
-                    ),
-                )
-            )
-        ),
-        end="",
-    )
-    print(
-        format(
-            Print(
-                Binary(
-                    Grouping(Binary(Integer("2"), OperatorEnum.PLUS, Integer("3"))),
                     OperatorEnum.TIMES,
-                    Integer("4"),
-                )
+                    Unary(OperatorEnum.MINUS, Integer("4")),
+                ),
             )
-        ),
-        end="",
+        )
     )
-    print(
-        format(
-            Print(
-                Binary(
-                    Float("2.0"),
-                    OperatorEnum.MINUS,
-                    Binary(Float("3.0"), OperatorEnum.DIVIDE, Float("4.0")),
-                )
+    p(
+        Print(
+            Binary(
+                Grouping(Binary(Integer("2"), OperatorEnum.PLUS, Integer("3"))),
+                OperatorEnum.TIMES,
+                Integer("4"),
+            )
+        )
+    )
+    p(
+        Print(
+            Binary(
+                Float("2.0"),
+                OperatorEnum.MINUS,
+                Binary(Float("3.0"), OperatorEnum.DIVIDE, Float("4.0")),
             )
         ),
+        True,
     )
 
     # program 3
-    print(
-        format(Declaration(Name("pi"), DeclarationEnum.CONST, None, Float("3.14159"))),
-        end="",
+    p(Declaration(Name("pi"), DeclarationEnum.CONST, None, Float("3.14159")))
+    p(
+        Declaration(
+            Name("tau"),
+            DeclarationEnum.CONST,
+            None,
+            Binary(Float("2.0"), OperatorEnum.MINUS, Name("pi")),
+        )
     )
-    print(
-        format(
-            Declaration(
-                Name("tau"),
-                DeclarationEnum.CONST,
-                None,
-                Binary(Float("2.0"), OperatorEnum.MINUS, Name("pi")),
+    p(Declaration(Name("radius"), DeclarationEnum.VAR, None, Float("4.0")))
+    p(Declaration(Name("perimeter"), DeclarationEnum.VAR, Type(TypeEnum.FLOAT), None))
+    p(
+        Expression(
+            Assign(
+                Name("perimeter"),
+                Binary(Name("tau"), OperatorEnum.TIMES, Name("radius")),
             )
-        ),
-        end="",
+        )
     )
-    print(
-        format(Declaration(Name("radius"), DeclarationEnum.VAR, None, Float("4.0"))),
-        end="",
-    )
-    print(
-        format(
-            Declaration(
-                Name("perimeter"), DeclarationEnum.VAR, Type(TypeEnum.FLOAT), None
-            )
-        ),
-        end="",
-    )
-    print(
-        format(
-            Expression(
-                Assign(
-                    Name("perimeter"),
-                    Binary(Name("tau"), OperatorEnum.TIMES, Name("radius")),
-                )
-            )
-        ),
-        end="",
-    )
-    print(format(Print(Name("perimeter"))))
+    p(Print(Name("perimeter")), True)
 
     # program 4
-    print(format(Print(Boolean("true"))), end="")
-    print(format(Print(Binary(Integer("1"), OperatorEnum.EQ_EQ, Integer("1")))), end="")
-    print(format(Print(Binary(Integer("0"), OperatorEnum.LESS, Integer("1")))), end="")
-    print(format(Print(Binary(Integer("1"), OperatorEnum.GREAT, Integer("0")))), end="")
+    p(Print(Boolean("true")))
+    p(Print(Binary(Integer("1"), OperatorEnum.EQ_EQ, Integer("1"))))
+    p(Print(Binary(Integer("0"), OperatorEnum.LESS, Integer("1"))))
+    p(Print(Binary(Integer("1"), OperatorEnum.GREAT, Integer("0"))))
     print(
         format(Print(Binary(Boolean("true"), OperatorEnum.AND, Boolean("true")))),
         end="",
@@ -115,82 +93,80 @@ if __name__ == "__main__":
         format(Print(Binary(Boolean("false"), OperatorEnum.OR, Boolean("true")))),
         end="",
     )
-    print(format(Print(Unary(OperatorEnum.NOT, Boolean("false")))))
+    p(Print(Unary(OperatorEnum.NOT, Boolean("false"))), True)
 
     # program 5
-    print(
-        format(
-            Declaration(
-                Name("a"), DeclarationEnum.VAR, Type(TypeEnum.INT), Integer("2")
-            )
-        ),
-        end="",
-    )
-    print(
-        format(
-            Declaration(
-                Name("b"), DeclarationEnum.VAR, Type(TypeEnum.INT), Integer("3")
-            )
-        ),
-        end="",
-    )
-    print(
-        format(
-            Declaration(Name("minval"), DeclarationEnum.VAR, Type(TypeEnum.INT), None)
-        ),
-        end="",
-    )
-    print(
-        format(
-            If(
-                Binary(Name("a"), OperatorEnum.LESS, Name("b")),
-                Block([Expression(Assign(Name("minval"), Name("a")))]),
-                Block([Expression(Assign(Name("minval"), Name("b")))]),
-            )
+    p(Declaration(Name("a"), DeclarationEnum.VAR, Type(TypeEnum.INT), Integer("2")))
+    p(Declaration(Name("b"), DeclarationEnum.VAR, Type(TypeEnum.INT), Integer("3")))
+    p(Declaration(Name("minval"), DeclarationEnum.VAR, Type(TypeEnum.INT), None))
+    p(
+        If(
+            Binary(Name("a"), OperatorEnum.LESS, Name("b")),
+            Block([Expression(Assign(Name("minval"), Name("a")))]),
+            Block([Expression(Assign(Name("minval"), Name("b")))]),
         )
     )
-    print(format(Print(Name("minval"))))
+    p(Print(Name("minval")), True)
 
     # program 6
-    print(
-        format(
-            Declaration(
-                Name("x"), DeclarationEnum.VAR, Type(TypeEnum.INT), Integer("1")
-            )
+    p(Declaration(Name("x"), DeclarationEnum.VAR, Type(TypeEnum.INT), Integer("1")))
+    p(Declaration(Name("fact"), DeclarationEnum.VAR, Type(TypeEnum.INT), Integer("1")))
+    p(
+        While(
+            Binary(Name("x"), OperatorEnum.LESS, Integer("11")),
+            Block(
+                [
+                    Expression(
+                        Assign(
+                            Name("fact"),
+                            Binary(Name("fact"), OperatorEnum.TIMES, Name("x")),
+                        )
+                    ),
+                    Expression(
+                        Assign(
+                            Name("x"),
+                            Binary(Name("x"), OperatorEnum.PLUS, Integer("1")),
+                        )
+                    ),
+                    Print(Name("fact")),
+                ]
+            ),
         ),
-        end="",
+        True,
     )
-    print(
-        format(
-            Declaration(
-                Name("fact"), DeclarationEnum.VAR, Type(TypeEnum.INT), Integer("1")
-            )
-        ),
-        end="",
-    )
-    print(
-        format(
-            While(
-                Binary(Name("x"), OperatorEnum.LESS, Integer("11")),
-                Block(
-                    [
-                        Expression(
-                            Binary(
-                                Name("fact"),
-                                OperatorEnum.EQ,
-                                Binary(Name("fact"), OperatorEnum.TIMES, Name("x")),
-                            )
+
+    # program 7
+    p(Declaration(Name("n"), DeclarationEnum.VAR, None, Integer("5")))
+    p(
+        While(
+            Boolean("true"),
+            Block(
+                [
+                    If(
+                        Binary(Name("n"), OperatorEnum.EQ_EQ, Integer("0")),
+                        Block([Break()]),
+                        Block(
+                            [
+                                Print(Name("n")),
+                                Expression(
+                                    Assign(
+                                        Name("n"),
+                                        Binary(
+                                            Name("n"), OperatorEnum.MINUS, Integer("1")
+                                        ),
+                                    )
+                                ),
+                                Continue(),
+                            ]
                         ),
-                        Expression(
-                            Binary(
-                                Name("x"),
-                                OperatorEnum.EQ,
-                                Binary(Name("x"), OperatorEnum.PLUS, Integer("1")),
-                            )
-                        ),
-                        Print(Name("fact")),
-                    ]
-                ),
-            )
+                    ),
+                    Expression(
+                        Assign(
+                            Name("n"),
+                            Binary(Name("n"), OperatorEnum.PLUS, Integer("1")),
+                        )
+                    ),
+                ],
+            ),
         )
     )
