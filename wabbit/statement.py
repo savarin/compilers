@@ -6,8 +6,8 @@ import expression
 
 
 class DeclarationEnum(enum.Enum):
-    CONST = "const"
-    VAR = "var"
+    CONST = "CONST"
+    VAR = "VAR"
 
 
 class Statem:

@@ -8,9 +8,9 @@ class Expr:
 
 
 class TypeEnum(enum.Enum):
-    BOOL = "bool"
-    FLOAT = "float"
-    INT = "int"
+    BOOL = "BOOL"
+    FLOAT = "FLOAT"
+    INT = "INT"
 
 
 class OperatorEnum(enum.Enum):
@@ -38,12 +38,6 @@ class Boolean(Expr):
 
 
 @dataclasses.dataclass
-class Call(Expr):
-    callee: Expr
-    arguments: List[Expr]
-
-
-@dataclasses.dataclass
 class Float(Expr):
     value: str
 
@@ -53,7 +47,7 @@ class Integer(Expr):
     value: str
 
 
-# Names
+# Name / Type
 
 
 @dataclasses.dataclass
@@ -80,6 +74,12 @@ class Binary(Expr):
     left: Expr
     operator: OperatorEnum
     right: Expr
+
+
+@dataclasses.dataclass
+class Call(Expr):
+    callee: Expr
+    arguments: List[Expr]
 
 
 @dataclasses.dataclass
