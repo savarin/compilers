@@ -60,11 +60,13 @@ def format(node: Union[Expr, Statem, None]) -> str:
         case Expression(expression):
             return f"{format(expression)};\n"
 
-        case Function(name, parameters, parameter_types, return_type, body):
+        case Function(name, parameter_names, parameter_types, return_type, body):
             parameters_string = ", ".join(
                 [
-                    format(parameter) + " " + format(parameter_type)
-                    for parameter, parameter_type in zip(parameters, parameter_types)
+                    format(parameter_name) + " " + format(parameter_type)
+                    for parameter_name, parameter_type in zip(
+                        parameter_names, parameter_types
+                    )
                 ]
             )
             return f"func {format(name)}({parameters_string}) {format(return_type)} {format(body)}"

@@ -48,7 +48,7 @@ class Expression(Statem):
 @dataclasses.dataclass
 class Function(Statem):
     name: expression.Name
-    parameters: List[expression.Name]
+    parameter_names: List[expression.Name]
     parameter_types: List[expression.Type]
     return_type: expression.Type
     body: Statem
