@@ -3,16 +3,13 @@ from expression import *
 from statement import *
 
 
-def p(statement, newline=False):
-    if newline:
-        return print(format(statement))
-
-    return print(format(statement), end="")
+def p(statement, end=""):
+    return print(format(statement), end=end)
 
 
 if __name__ == "__main__":
     # program 1
-    p(Print(Integer("42")), True)
+    p(Print(Integer("42")), "\n")
 
     # # program 2
     p(Print(Binary(Integer("2"), OperatorEnum.PLUS, Integer("3"))))
@@ -55,7 +52,7 @@ if __name__ == "__main__":
                 Binary(Float("3.0"), OperatorEnum.DIVIDE, Float("4.0")),
             )
         ),
-        True,
+        "\n",
     )
 
     # program 3
@@ -78,7 +75,7 @@ if __name__ == "__main__":
             )
         )
     )
-    p(Print(Name("perimeter")), True)
+    p(Print(Name("perimeter")), "\n")
 
     # program 4
     p(Print(Boolean("true")))
@@ -93,7 +90,7 @@ if __name__ == "__main__":
         format(Print(Binary(Boolean("false"), OperatorEnum.OR, Boolean("true")))),
         end="",
     )
-    p(Print(Unary(OperatorEnum.NOT, Boolean("false"))), True)
+    p(Print(Unary(OperatorEnum.NOT, Boolean("false"))), "\n")
 
     # program 5
     p(Declaration(Name("a"), DeclarationEnum.VAR, Type(TypeEnum.INT), Integer("2")))
@@ -106,7 +103,7 @@ if __name__ == "__main__":
             Block([Expression(Assign(Name("minval"), Name("b")))]),
         )
     )
-    p(Print(Name("minval")), True)
+    p(Print(Name("minval")), "\n")
 
     # program 6
     p(Declaration(Name("x"), DeclarationEnum.VAR, Type(TypeEnum.INT), Integer("1")))
@@ -132,7 +129,7 @@ if __name__ == "__main__":
                 ]
             ),
         ),
-        True,
+        "\n",
     )
 
     # program 7
@@ -169,7 +166,7 @@ if __name__ == "__main__":
                 ],
             ),
         ),
-        True,
+        "\n",
     )
 
     # program 8
@@ -190,4 +187,4 @@ if __name__ == "__main__":
             Call(Name("add"), [Integer("2"), Integer("3")]),
         )
     )
-    p(Print(Name("result")))
+    p(Print(Name("result")), "\n")
