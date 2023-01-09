@@ -11,7 +11,7 @@ if __name__ == "__main__":
     # program 1
     p(Print(Integer("42")), "\n")
 
-    # # program 2
+    # program 2
     p(Print(Binary(Integer("2"), OperatorEnum.PLUS, Integer("3"))))
     p(
         Print(

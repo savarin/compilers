@@ -39,9 +39,10 @@ def format(node: Union[Expr, Statem, None]) -> str:
             result = "{\n"
 
             for statement in statements:
-                result += "    " + format(statement)
+                result += format(statement)
 
-            return result + "}\n"
+            result = result.replace("\n", "\n    ")
+            return result.rstrip("    ") + "}\n"
 
         case Break():
             return "break;\n"
