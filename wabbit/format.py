@@ -36,12 +36,11 @@ def format(node: Union[Expr, Statem, None]) -> str:
             return f"{operator.value}{format(right)}"
 
         case Block(statements):
-            result = "{\n"
+            result = "{\n    "
 
             for statement in statements:
-                result += format(statement)
+                result += format(statement).replace("\n", "\n    ")
 
-            result = result.replace("\n", "\n    ")
             return result.rstrip("    ") + "}\n"
 
         case Break():
@@ -51,37 +50,35 @@ def format(node: Union[Expr, Statem, None]) -> str:
             return "continue;\n"
 
         case Declaration(name, declaration_type, value_type, initializer):
-            declaration = declaration_type.value
             value = f" {format(value_type)}" if value_type is not None else ""
-            init = f" = {format(initializer)}" if initializer else ""
+            initial = f" = {format(initializer)}" if initializer is not None else ""
 
-            return f"{declaration} {format(name)}{value}{init};\n"
+            return f"{declaration_type.value} {format(name)}{value}{initial};\n"
 
         case Expression(expression):
             return f"{format(expression)};\n"
 
         case Function(name, parameter_names, parameter_types, return_type, body):
-            parameters_string = ", ".join(
+            parameters = ", ".join(
                 [
-                    format(parameter_name) + " " + format(parameter_type)
+                    f"{format(parameter_name)} {format(parameter_type)}"
                     for parameter_name, parameter_type in zip(
                         parameter_names, parameter_types
                     )
                 ]
             )
-            return f"func {format(name)}({parameters_string}) {format(return_type)} {format(body)}"
+            return f"func {format(name)}({parameters}) {format(return_type)} {format(body)}"
 
         case If(condition, then_branch, else_branch):
-            if_then_string = f"if {format(condition)} {format(then_branch)}"
-
-            if else_branch is not None:
-                if_then_string = if_then_string.rstrip("\n")
-
-            else_string = (
+            consequent = f"if {format(condition)} {format(then_branch)}"
+            alternate = (
                 f" else {format(else_branch)}" if else_branch is not None else ""
             )
 
-            return if_then_string + else_string
+            if else_branch is not None:
+                consequent = consequent.rstrip("\n")
+
+            return consequent + alternate
 
         case Print(expression):
             return f"print {format(expression)};\n"
