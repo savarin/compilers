@@ -2,8 +2,6 @@ from typing import Union
 
 from expression import (
     Expr,
-    TypeEnum,
-    OperatorEnum,
     Boolean,
     Float,
     Integer,
@@ -16,7 +14,6 @@ from expression import (
     Unary,
 )
 from statement import (
-    DeclarationEnum,
     Statem,
     Block,
     Break,

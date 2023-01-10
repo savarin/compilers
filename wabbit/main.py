@@ -1,6 +1,5 @@
 from format import format
 from expression import (
-    Expr,
     TypeEnum,
     OperatorEnum,
     Boolean,

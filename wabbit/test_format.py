@@ -1,6 +1,5 @@
 from format import format
 from expression import (
-    Expr,
     TypeEnum,
     OperatorEnum,
     Boolean,
@@ -16,7 +15,6 @@ from expression import (
 )
 from statement import (
     DeclarationEnum,
-    Statem,
     Block,
     Break,
     Continue,
@@ -180,7 +178,7 @@ def test_format():
         )
         == "var minval int;\n"
     )
-    abra = (
+    assert (
         format(
             If(
                 Binary(Name("a"), OperatorEnum.LESS, Name("b")),
