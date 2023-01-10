@@ -1,6 +1,34 @@
 from typing import Union
-from expression import *
-from statement import *
+
+from expression import (
+    Expr,
+    TypeEnum,
+    OperatorEnum,
+    Boolean,
+    Float,
+    Integer,
+    Name,
+    Type,
+    Assign,
+    Binary,
+    Call,
+    Grouping,
+    Unary,
+)
+from statement import (
+    DeclarationEnum,
+    Statem,
+    Block,
+    Break,
+    Continue,
+    Declaration,
+    Expression,
+    Function,
+    If,
+    Print,
+    Return,
+    While,
+)
 
 
 def format(node: Union[Expr, Statem, None]) -> str:
