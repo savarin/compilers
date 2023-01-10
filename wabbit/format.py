@@ -48,8 +48,8 @@ def format(node: Union[Expr, Statem, None]) -> str:
         case Assign(name, value):
             return f"{format(name)} = {format(value)}"
 
-        case Binary(left, operator, right):
-            return f"{format(left)} {operator.value} {format(right)}"
+        case Binary(left, operator_enum, right):
+            return f"{format(left)} {operator_enum.value} {format(right)}"
 
         case Call(callee, arguments):
             return f"{format(callee)}({', '.join([format(argument) for argument in arguments])})"
@@ -57,8 +57,8 @@ def format(node: Union[Expr, Statem, None]) -> str:
         case Grouping(expression):
             return f"({format(expression)})"
 
-        case Unary(operator, right):
-            return f"{operator.value}{format(right)}"
+        case Unary(operator_enum, right):
+            return f"{operator_enum.value}{format(right)}"
 
         case Block(statements):
             result = "{\n    "

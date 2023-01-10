@@ -72,7 +72,7 @@ class Assign(Expr):
 @dataclasses.dataclass
 class Binary(Expr):
     left: Expr
-    operator: OperatorEnum
+    operator_enum: OperatorEnum
     right: Expr
 
 
@@ -89,5 +89,5 @@ class Grouping(Expr):
 
 @dataclasses.dataclass
 class Unary(Expr):
-    operator: OperatorEnum
+    operator_enum: OperatorEnum
     right: Expr
