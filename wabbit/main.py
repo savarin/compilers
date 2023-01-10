@@ -12,7 +12,7 @@ if __name__ == "__main__":
     f(Print(Integer("42")), True)
 
     # program 2
-    f(Print(Binary(Integer("2"), OperatorEnum.PLUS, Integer("3"))))
+    f(Print(Binary(Integer("2"), OperatorEnum.TIMES, Integer("3"))))
     f(
         Print(
             Binary(
@@ -79,9 +79,9 @@ if __name__ == "__main__":
 
     # program 4
     f(Print(Boolean("true")))
-    f(Print(Binary(Integer("1"), OperatorEnum.EQ_EQ, Integer("1"))))
+    f(Print(Binary(Integer("1"), OperatorEnum.EQUAL_EQUAL, Integer("1"))))
     f(Print(Binary(Integer("0"), OperatorEnum.LESS, Integer("1"))))
-    f(Print(Binary(Integer("1"), OperatorEnum.GREAT, Integer("0"))))
+    f(Print(Binary(Integer("1"), OperatorEnum.GREATER, Integer("0"))))
     f(Print(Binary(Boolean("true"), OperatorEnum.AND, Boolean("true"))))
     f(Print(Binary(Boolean("false"), OperatorEnum.OR, Boolean("true"))))
     f(Print(Unary(OperatorEnum.NOT, Boolean("false"))), True)
@@ -134,7 +134,7 @@ if __name__ == "__main__":
             Block(
                 [
                     If(
-                        Binary(Name("n"), OperatorEnum.EQ_EQ, Integer("0")),
+                        Binary(Name("n"), OperatorEnum.EQUAL_EQUAL, Integer("0")),
                         Block([Break()]),
                         Block(
                             [
