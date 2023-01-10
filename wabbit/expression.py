@@ -3,10 +3,6 @@ import dataclasses
 import enum
 
 
-class Expr:
-    pass
-
-
 class TypeEnum(enum.Enum):
     BOOL = "BOOL"
     FLOAT = "FLOAT"
@@ -27,6 +23,10 @@ class OperatorEnum(enum.Enum):
     AND = "&&"
     OR = "||"
     NOT = "!"
+
+
+class Expr:
+    pass
 
 
 # Primitives
