@@ -12,7 +12,7 @@ from expression import (
     Grouping,
     Unary,
 )
-from statement import DeclarationEnum, Block, Declaration, Expression, If, Print
+from statement import DeclarationEnum, Block, Declaration, Expression, If, Print, While
 
 
 def test_evaluate():
@@ -119,3 +119,40 @@ def test_evaluate():
     ]
 
     assert interpret(init_interpreter(statements)) == ["2"]
+
+    # program 6
+    statements = [
+        Declaration(Name("x"), DeclarationEnum.VAR, Type(TypeEnum.INT), Integer("1")),
+        Declaration(
+            Name("fact"), DeclarationEnum.VAR, Type(TypeEnum.INT), Integer("1")
+        ),
+        While(
+            Binary(Name("x"), OperatorEnum.LESS, Integer("7")),
+            Block(
+                [
+                    Expression(
+                        Assign(
+                            Name("fact"),
+                            Binary(Name("fact"), OperatorEnum.TIMES, Name("x")),
+                        )
+                    ),
+                    Expression(
+                        Assign(
+                            Name("x"),
+                            Binary(Name("x"), OperatorEnum.PLUS, Integer("1")),
+                        )
+                    ),
+                    Print(Name("fact")),
+                ]
+            ),
+        ),
+    ]
+
+    assert interpret(init_interpreter(statements)) == [
+        "1",
+        "2",
+        "6",
+        "24",
+        "120",
+        "720",
+    ]

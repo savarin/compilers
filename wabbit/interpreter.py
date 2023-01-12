@@ -14,7 +14,7 @@ from expression import (
     Binary,
     Unary,
 )
-from statement import Block, Declaration, Expression, If, Print, Statem
+from statement import Block, Declaration, Expression, If, Print, Statem, While
 
 
 @dataclasses.dataclass
@@ -100,30 +100,39 @@ def execute(  # type: ignore[return]
 
         # TODO: Implement storing of const vs var type.
         case Declaration(name, _, _, initializer):
-            value = None
+            declaration_result = None
 
             if initializer is not None:
-                environment, value = evaluate(interpreter.environment, initializer)
+                environment, declaration_result = evaluate(
+                    interpreter.environment, initializer
+                )
 
-            interpreter.environment = define(interpreter.environment, name.text, value)
+            interpreter.environment = define(
+                interpreter.environment, name.text, declaration_result
+            )
             return interpreter, []
 
         case Expression(expression):
-            interpreter.environment, result = evaluate(
+            interpreter.environment, expression_result = evaluate(
                 interpreter.environment, expression
             )
 
-            if isinstance(result, list):
-                return interpreter, result
+            if isinstance(expression_result, list):
+                return interpreter, expression_result
 
-            return interpreter, []
+            return (
+                interpreter,
+                [str(expression_result.py_value)]
+                if expression_result is not None
+                else [],
+            )
 
         case If(condition, then_branch, else_branch):
-            interpreter.environment, result = evaluate(
+            interpreter.environment, if_predicate = evaluate(
                 interpreter.environment, condition
             )
 
-            if result:
+            if if_predicate is not None and if_predicate.py_value:
                 return execute(interpreter, then_branch)
 
             if else_branch is not None:
@@ -132,15 +141,32 @@ def execute(  # type: ignore[return]
             return interpreter, []
 
         case Print(expression):
-            interpreter.environment, result = evaluate(
+            interpreter.environment, print_result = evaluate(
                 interpreter.environment, expression
             )
 
-            if isinstance(result, list):
-                return interpreter, result
+            if isinstance(print_result, list):
+                return interpreter, print_result
 
-            assert result is not None
-            return interpreter, [str(result.py_value or "nil")]
+            return interpreter, [
+                str(print_result.py_value) if print_result is not None else "nil"
+            ]
+
+        case While(condition, body):
+            while_result: List[str] = []
+
+            while True:
+                interpreter.environment, while_predicate = evaluate(
+                    interpreter.environment, condition
+                )
+
+                if while_predicate is None or not while_predicate.py_value:
+                    break
+
+                interpreter, individual_result = execute(interpreter, body)
+                while_result += individual_result
+
+            return interpreter, while_result
 
         case _:
             raise Exception(
