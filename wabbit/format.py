@@ -28,7 +28,7 @@ from statement import (
 )
 
 
-def format(node: Union[Expr, Statem, None]) -> str:
+def format(node: Union[Expr, Statem]) -> str:
     match node:
         case Boolean(value):
             return value

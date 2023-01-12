@@ -15,63 +15,65 @@ from expression import (
 
 
 @dataclasses.dataclass
-class WValue:
-    w_type: TypeEnum
-    p_value: Union[bool, float, int]
+class Value:
+    type: TypeEnum
+    py_value: Union[bool, float, int]
 
 
-def evaluate(expression: Expr) -> WValue:  # type: ignore[return]
+def evaluate(expression: Expr) -> Value:  # type: ignore[return]
     match expression:
         case Boolean(value):
-            return WValue(TypeEnum.BOOL, bool(value))
+            return Value(TypeEnum.BOOL, bool(value))
 
         case Float(value):
-            return WValue(TypeEnum.FLOAT, float(value))
+            return Value(TypeEnum.FLOAT, float(value))
 
         case Integer(value):
-            return WValue(TypeEnum.INT, int(value))
+            return Value(TypeEnum.INT, int(value))
 
         case Binary(left, operator_enum, right):
             left_eval = evaluate(left)
             right_eval = evaluate(right)
 
-            assert left_eval.w_type == right_eval.w_type
+            assert left_eval.type == right_eval.type
 
             if operator_enum == OperatorEnum.PLUS:
-                if left_eval.w_type == TypeEnum.FLOAT:
-                    return WValue(
-                        TypeEnum.FLOAT, left_eval.p_value + right_eval.p_value
+                if left_eval.type == TypeEnum.FLOAT:
+                    return Value(
+                        TypeEnum.FLOAT, left_eval.py_value + right_eval.py_value
                     )
 
-                elif left_eval.w_type == TypeEnum.INT:
-                    return WValue(TypeEnum.INT, left_eval.p_value + right_eval.p_value)
+                elif left_eval.type == TypeEnum.INT:
+                    return Value(TypeEnum.INT, left_eval.py_value + right_eval.py_value)
 
             elif operator_enum == OperatorEnum.MINUS:
-                if left_eval.w_type == TypeEnum.FLOAT:
-                    return WValue(
-                        TypeEnum.FLOAT, left_eval.p_value - right_eval.p_value
+                if left_eval.type == TypeEnum.FLOAT:
+                    return Value(
+                        TypeEnum.FLOAT, left_eval.py_value - right_eval.py_value
                     )
 
-                elif left_eval.w_type == TypeEnum.INT:
-                    return WValue(TypeEnum.INT, left_eval.p_value - right_eval.p_value)
+                elif left_eval.type == TypeEnum.INT:
+                    return Value(TypeEnum.INT, left_eval.py_value - right_eval.py_value)
 
             elif operator_enum == OperatorEnum.TIMES:
-                if left_eval.w_type == TypeEnum.FLOAT:
-                    return WValue(
-                        TypeEnum.FLOAT, left_eval.p_value * right_eval.p_value
+                if left_eval.type == TypeEnum.FLOAT:
+                    return Value(
+                        TypeEnum.FLOAT, left_eval.py_value * right_eval.py_value
                     )
 
-                elif left_eval.w_type == TypeEnum.INT:
-                    return WValue(TypeEnum.INT, left_eval.p_value * right_eval.p_value)
+                elif left_eval.type == TypeEnum.INT:
+                    return Value(TypeEnum.INT, left_eval.py_value * right_eval.py_value)
 
             elif operator_enum == OperatorEnum.DIVIDE:
-                if left_eval.w_type == TypeEnum.FLOAT:
-                    return WValue(
-                        TypeEnum.FLOAT, left_eval.p_value / right_eval.p_value
+                if left_eval.type == TypeEnum.FLOAT:
+                    return Value(
+                        TypeEnum.FLOAT, left_eval.py_value / right_eval.py_value
                     )
 
-                elif left_eval.w_type == TypeEnum.INT:
-                    return WValue(TypeEnum.INT, left_eval.p_value // right_eval.p_value)
+                elif left_eval.type == TypeEnum.INT:
+                    return Value(
+                        TypeEnum.INT, left_eval.py_value // right_eval.py_value
+                    )
 
         case Grouping(expression):
             return evaluate(expression)
@@ -80,11 +82,11 @@ def evaluate(expression: Expr) -> WValue:  # type: ignore[return]
             right_eval = evaluate(right)
 
             if operator_enum == OperatorEnum.MINUS:
-                if right_eval.w_type == TypeEnum.FLOAT:
-                    return WValue(TypeEnum.FLOAT, -right_eval.p_value)
+                if right_eval.type == TypeEnum.FLOAT:
+                    return Value(TypeEnum.FLOAT, -right_eval.py_value)
 
-                elif right_eval.w_type == TypeEnum.INT:
-                    return WValue(TypeEnum.INT, -right_eval.p_value)
+                elif right_eval.type == TypeEnum.INT:
+                    return Value(TypeEnum.INT, -right_eval.py_value)
 
         case _:
             raise Exception("Exhaustive switch error.")
