@@ -113,10 +113,14 @@ def execute(  # type: ignore[return]
             raise Exception("Exhaustive switch error.")
 
 
-def evaluate(environment: Environment, expression: Expr) -> Tuple[Environment, Optional[Value]]:  # type: ignore[return]
+def evaluate(  # type: ignore[return]
+    environment: Environment, expression: Expr
+) -> Tuple[Environment, Optional[Value]]:
     match expression:
         case Boolean(value):
-            return environment, Value(TypeEnum.BOOL, bool(value))
+            return environment, Value(
+                TypeEnum.BOOL, {"true": True, "false": False}[value]
+            )
 
         case Float(value):
             return environment, Value(TypeEnum.FLOAT, float(value))
@@ -182,6 +186,48 @@ def evaluate(environment: Environment, expression: Expr) -> Tuple[Environment, O
                         TypeEnum.INT, left_eval.py_value // right_eval.py_value
                     )
 
+            elif operator_enum == OperatorEnum.EQUAL_EQUAL:
+                if left_eval.type in {TypeEnum.FLOAT, TypeEnum.INT, TypeEnum.BOOL}:
+                    return environment, Value(
+                        TypeEnum.BOOL, left_eval.py_value == right_eval.py_value
+                    )
+
+            elif operator_enum == OperatorEnum.LESS:
+                if left_eval.type in {TypeEnum.FLOAT, TypeEnum.INT, TypeEnum.BOOL}:
+                    return environment, Value(
+                        TypeEnum.BOOL, left_eval.py_value < right_eval.py_value
+                    )
+
+            elif operator_enum == OperatorEnum.LESS_EQUAL:
+                if left_eval.type in {TypeEnum.FLOAT, TypeEnum.INT, TypeEnum.BOOL}:
+                    return environment, Value(
+                        TypeEnum.BOOL, left_eval.py_value <= right_eval.py_value
+                    )
+
+            elif operator_enum == OperatorEnum.GREATER:
+                if left_eval.type in {TypeEnum.FLOAT, TypeEnum.INT, TypeEnum.BOOL}:
+                    return environment, Value(
+                        TypeEnum.BOOL, left_eval.py_value > right_eval.py_value
+                    )
+
+            elif operator_enum == OperatorEnum.GREATER_EQUAL:
+                if left_eval.type in {TypeEnum.FLOAT, TypeEnum.INT, TypeEnum.BOOL}:
+                    return environment, Value(
+                        TypeEnum.BOOL, left_eval.py_value >= right_eval.py_value
+                    )
+
+            elif operator_enum == OperatorEnum.AND:
+                if left_eval.type == TypeEnum.BOOL:
+                    return environment, Value(
+                        TypeEnum.BOOL, left_eval.py_value and right_eval.py_value
+                    )
+
+            elif operator_enum == OperatorEnum.OR:
+                if left_eval.type == TypeEnum.BOOL:
+                    return environment, Value(
+                        TypeEnum.BOOL, left_eval.py_value or right_eval.py_value
+                    )
+
         case Grouping(expression):
             return evaluate(environment, expression)
 
@@ -195,6 +241,10 @@ def evaluate(environment: Environment, expression: Expr) -> Tuple[Environment, O
 
                 elif right_eval.type == TypeEnum.INT:
                     return environment, Value(TypeEnum.INT, -right_eval.py_value)
+
+            elif operator_enum == OperatorEnum.NOT:
+                if right_eval.type == TypeEnum.BOOL:
+                    return environment, Value(TypeEnum.BOOL, not right_eval.py_value)
 
         case _:
             raise Exception("Exhaustive switch error.")

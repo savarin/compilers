@@ -2,6 +2,7 @@ from interpreter import Value, evaluate, init_environment, init_interpreter, int
 from expression import (
     TypeEnum,
     OperatorEnum,
+    Boolean,
     Integer,
     Float,
     Name,
@@ -81,5 +82,25 @@ def test_evaluate():
         Print(Name("perimeter")),
     ]
 
-    interpreter = init_interpreter(statements)
-    assert interpret(interpreter) == ["-4.5663599999999995"]
+    assert interpret(init_interpreter(statements)) == ["-4.5663599999999995"]
+
+    # program 4
+    assert evaluate(environment, Boolean("true"))[1] == Value(TypeEnum.BOOL, True)
+    assert evaluate(
+        environment, Binary(Integer("1"), OperatorEnum.EQUAL_EQUAL, Integer("1"))
+    )[1] == Value(TypeEnum.BOOL, True)
+    assert evaluate(environment, Binary(Integer("0"), OperatorEnum.LESS, Integer("1")))[
+        1
+    ] == Value(TypeEnum.BOOL, True)
+    assert evaluate(
+        environment, Binary(Integer("1"), OperatorEnum.GREATER, Integer("0"))
+    )[1] == Value(TypeEnum.BOOL, True)
+    assert evaluate(
+        environment, Binary(Boolean("true"), OperatorEnum.AND, Boolean("true"))
+    )[1] == Value(TypeEnum.BOOL, True)
+    assert evaluate(
+        environment, Binary(Boolean("false"), OperatorEnum.OR, Boolean("true"))
+    )[1] == Value(TypeEnum.BOOL, True)
+    assert evaluate(environment, Unary(OperatorEnum.NOT, Boolean("false")))[1] == Value(
+        TypeEnum.BOOL, True
+    )
