@@ -14,7 +14,7 @@ from expression import (
     Binary,
     Unary,
 )
-from statement import Declaration, Expression, Print, Statem
+from statement import Block, Declaration, Expression, If, Print, Statem
 
 
 @dataclasses.dataclass
@@ -25,12 +25,22 @@ class Value:
 
 @dataclasses.dataclass
 class Environment:
+    environment: Optional["Environment"]
     values: Dict[str, Optional[Value]]
 
 
-def init_environment() -> Environment:
+def init_environment(environment: Optional["Environment"] = None) -> Environment:
     values: Dict[str, Optional[Value]] = {}
-    return Environment(values)
+
+    if environment is not None:
+        individual_environment = environment.environment
+        individual_values = environment.values
+
+        environment = Environment(
+            environment=individual_environment, values=individual_values
+        )
+
+    return Environment(environment=environment, values=values)
 
 
 def define(environment: Environment, name: str, value: Optional[Value]) -> Environment:
@@ -42,7 +52,10 @@ def get(environment: Environment, name: str) -> Optional[Value]:
     if name in environment.values:
         return environment.values[name]
 
-    raise Exception("Name not found.")
+    if environment.environment is not None:
+        return get(environment.environment, name)
+
+    raise Exception("Name not found across all environments.")
 
 
 def assign(environment: Environment, name: str, value: Optional[Value]) -> Environment:
@@ -50,7 +63,11 @@ def assign(environment: Environment, name: str, value: Optional[Value]) -> Envir
         environment.values[name] = value
         return environment
 
-    raise Exception("Name not found.")
+    if environment.environment is not None:
+        environment.environment = assign(environment.environment, name, value)
+        return environment
+
+    raise Exception("Name not found across all environments.")
 
 
 @dataclasses.dataclass
@@ -78,6 +95,9 @@ def execute(  # type: ignore[return]
     interpreter: Interpreter, statement: Statem
 ) -> Tuple[Interpreter, List[str]]:
     match statement:
+        case Block(statements):
+            return execute_block(interpreter, statements)
+
         # TODO: Implement storing of const vs var type.
         case Declaration(name, _, _, initializer):
             value = None
@@ -98,6 +118,19 @@ def execute(  # type: ignore[return]
 
             return interpreter, []
 
+        case If(condition, then_branch, else_branch):
+            interpreter.environment, result = evaluate(
+                interpreter.environment, condition
+            )
+
+            if result:
+                return execute(interpreter, then_branch)
+
+            if else_branch is not None:
+                return execute(interpreter, else_branch)
+
+            return interpreter, []
+
         case Print(expression):
             interpreter.environment, result = evaluate(
                 interpreter.environment, expression
@@ -110,7 +143,28 @@ def execute(  # type: ignore[return]
             return interpreter, [str(result.py_value or "nil")]
 
         case _:
-            raise Exception("Exhaustive switch error.")
+            raise Exception(
+                f"Exhaustive switch error on {statement.__class__.__name__}."
+            )
+
+
+def execute_block(
+    interpreter: Interpreter, statements: List[Statem]
+) -> Tuple[Interpreter, List[str]]:
+    result: List[str] = []
+    previous = interpreter.environment
+
+    try:
+        interpreter.environment = init_environment(interpreter.environment)
+
+        for statement in statements:
+            interpreter, individual_result = execute(interpreter, statement)
+            result += individual_result
+
+    finally:
+        interpreter.environment = previous
+
+    return interpreter, result
 
 
 def evaluate(  # type: ignore[return]
@@ -247,4 +301,6 @@ def evaluate(  # type: ignore[return]
                     return environment, Value(TypeEnum.BOOL, not right_eval.py_value)
 
         case _:
-            raise Exception("Exhaustive switch error.")
+            raise Exception(
+                f"Exhaustive switch error on {expression.__class__.__name__}."
+            )
