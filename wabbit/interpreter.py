@@ -30,7 +30,6 @@ from statement import (
 
 class ControlFlowEnum(enum.Enum):
     NONE = "NONE"
-    LOOP = "LOOP"
     BREAK = "BREAK"
     CONTINUE = "CONTINUE"
 
@@ -194,6 +193,8 @@ def execute(  # type: ignore[return]
                     interpreter, body, True
                 )
 
+                # When jump to end of block, continue will execute the next loop
+                # and break takes out of loop.
                 if control_flow_enum == ControlFlowEnum.BREAK:
                     break
 
@@ -225,7 +226,8 @@ def execute_block(
 
             result += individual_result
 
-            if control_flow_enum in {ControlFlowEnum.BREAK, ControlFlowEnum.CONTINUE}:
+            # When encounter break or continue, jump to end of block.
+            if control_flow_enum != ControlFlowEnum.NONE:
                 if is_loop:
                     break
 
