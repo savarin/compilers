@@ -1,5 +1,6 @@
 from typing import Dict, List, Optional, Tuple, Union
 import dataclasses
+import enum
 
 from expression import (
     TypeEnum,
@@ -14,7 +15,24 @@ from expression import (
     Binary,
     Unary,
 )
-from statement import Block, Declaration, Expression, If, Print, Statem, While
+from statement import (
+    Block,
+    Break,
+    Continue,
+    Declaration,
+    Expression,
+    If,
+    Print,
+    Statem,
+    While,
+)
+
+
+class ControlFlowEnum(enum.Enum):
+    NONE = "NONE"
+    LOOP = "LOOP"
+    BREAK = "BREAK"
+    CONTINUE = "CONTINUE"
 
 
 @dataclasses.dataclass
@@ -85,18 +103,24 @@ def interpret(interpreter: Interpreter) -> List[str]:
     result: List[str] = []
 
     for statement in interpreter.statements:
-        interpreter, individual_result = execute(interpreter, statement)
+        interpreter, individual_result, _ = execute(interpreter, statement, False)
         result += individual_result
 
     return result
 
 
 def execute(  # type: ignore[return]
-    interpreter: Interpreter, statement: Statem
-) -> Tuple[Interpreter, List[str]]:
+    interpreter: Interpreter, statement: Statem, is_loop: bool
+) -> Tuple[Interpreter, List[str], ControlFlowEnum]:
     match statement:
         case Block(statements):
-            return execute_block(interpreter, statements)
+            return execute_block(interpreter, statements, is_loop)
+
+        case Break():
+            return interpreter, [], ControlFlowEnum.BREAK
+
+        case Continue():
+            return interpreter, [], ControlFlowEnum.CONTINUE
 
         # TODO: Implement storing of const vs var type.
         case Declaration(name, _, _, initializer):
@@ -110,7 +134,7 @@ def execute(  # type: ignore[return]
             interpreter.environment = define(
                 interpreter.environment, name.text, declaration_result
             )
-            return interpreter, []
+            return interpreter, [], ControlFlowEnum.NONE
 
         case Expression(expression):
             interpreter.environment, expression_result = evaluate(
@@ -118,13 +142,14 @@ def execute(  # type: ignore[return]
             )
 
             if isinstance(expression_result, list):
-                return interpreter, expression_result
+                return interpreter, expression_result, ControlFlowEnum.NONE
 
             return (
                 interpreter,
                 [str(expression_result.py_value)]
                 if expression_result is not None
                 else [],
+                ControlFlowEnum.NONE,
             )
 
         case If(condition, then_branch, else_branch):
@@ -133,12 +158,12 @@ def execute(  # type: ignore[return]
             )
 
             if if_predicate is not None and if_predicate.py_value:
-                return execute(interpreter, then_branch)
+                return execute(interpreter, then_branch, is_loop)
 
-            if else_branch is not None:
-                return execute(interpreter, else_branch)
+            elif else_branch is not None:
+                return execute(interpreter, else_branch, is_loop)
 
-            return interpreter, []
+            return interpreter, [], ControlFlowEnum.NONE
 
         case Print(expression):
             interpreter.environment, print_result = evaluate(
@@ -146,11 +171,13 @@ def execute(  # type: ignore[return]
             )
 
             if isinstance(print_result, list):
-                return interpreter, print_result
+                return interpreter, print_result, ControlFlowEnum.NONE
 
-            return interpreter, [
-                str(print_result.py_value) if print_result is not None else "nil"
-            ]
+            return (
+                interpreter,
+                [str(print_result.py_value) if print_result is not None else "nil"],
+                ControlFlowEnum.NONE,
+            )
 
         case While(condition, body):
             while_result: List[str] = []
@@ -163,10 +190,16 @@ def execute(  # type: ignore[return]
                 if while_predicate is None or not while_predicate.py_value:
                     break
 
-                interpreter, individual_result = execute(interpreter, body)
+                interpreter, individual_result, control_flow_enum = execute(
+                    interpreter, body, True
+                )
+
+                if control_flow_enum == ControlFlowEnum.BREAK:
+                    break
+
                 while_result += individual_result
 
-            return interpreter, while_result
+            return interpreter, while_result, ControlFlowEnum.NONE
 
         case _:
             raise Exception(
@@ -175,8 +208,10 @@ def execute(  # type: ignore[return]
 
 
 def execute_block(
-    interpreter: Interpreter, statements: List[Statem]
-) -> Tuple[Interpreter, List[str]]:
+    interpreter: Interpreter,
+    statements: List[Statem],
+    is_loop: bool,
+) -> Tuple[Interpreter, List[str], ControlFlowEnum]:
     result: List[str] = []
     previous = interpreter.environment
 
@@ -184,13 +219,22 @@ def execute_block(
         interpreter.environment = init_environment(interpreter.environment)
 
         for statement in statements:
-            interpreter, individual_result = execute(interpreter, statement)
+            interpreter, individual_result, control_flow_enum = execute(
+                interpreter, statement, is_loop
+            )
+
             result += individual_result
+
+            if control_flow_enum in {ControlFlowEnum.BREAK, ControlFlowEnum.CONTINUE}:
+                if is_loop:
+                    break
+
+                raise Exception(f"Not in loop for {control_flow_enum.value}.")
 
     finally:
         interpreter.environment = previous
 
-    return interpreter, result
+    return interpreter, result, control_flow_enum
 
 
 def evaluate(  # type: ignore[return]
