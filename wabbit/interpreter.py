@@ -126,8 +126,7 @@ def execute(  # type: ignore[return]
 ) -> Tuple[Interpreter, List[str], ControlFlowEnum]:
     match statement:
         case Block(statements):
-            environment = init_environment(interpreter.environment)
-            return execute_block(interpreter, statements, environment, is_loop)
+            return execute_block(interpreter, statements, None, is_loop)
 
         case Break():
             return interpreter, [], ControlFlowEnum.BREAK
@@ -161,6 +160,8 @@ def execute(  # type: ignore[return]
             )
 
         case Function(name, _, _, _, _):
+            # Simply store the whole statement defining the function in the
+            # environment, to be called in a similar way to a variable.
             interpreter.environment = define(
                 interpreter.environment, name.text, statement
             )
@@ -229,11 +230,18 @@ def execute(  # type: ignore[return]
 def execute_block(
     interpreter: Interpreter,
     statements: List[Statem],
-    environment: Environment,
+    environment: Optional[Environment],
     is_loop: bool,
 ) -> Tuple[Interpreter, List[str], ControlFlowEnum]:
     result: List[str] = []
     previous = interpreter.environment
+
+    # Entering the block will temporarily replace the environment with the one
+    # passed as the environment argument. For functions this will be the
+    # environment with parameters substituted with arguments, for other uses is
+    # expected to be set at None.
+    if environment is None:
+        environment = init_environment(interpreter.environment)
 
     try:
         interpreter.environment = environment
@@ -413,6 +421,8 @@ def evaluate(  # type: ignore[return]
 
 
 def call(interpreter, function, arguments):
+    # Enclose the current environment in a new environment, then allow function
+    # parameters to be replaced by arguments at function call.
     environment = init_environment(interpreter.environment)
 
     for i, parameter in enumerate(function.parameter_names):
@@ -423,6 +433,10 @@ def call(interpreter, function, arguments):
             interpreter, function.body.statements, environment, False
         )
 
+    # TODO: Consider replacing exception handling with early loop termination
+    # in the case of exception handling. May need to retain exception handling
+    # as a simple way to pass the return value, otherwise requires an additional
+    # return slot.
     except ReturnException as return_value:
         return interpreter, return_value.value
 
