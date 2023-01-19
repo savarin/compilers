@@ -13,6 +13,7 @@ from expression import (
     Grouping,
     Integer,
     Binary,
+    Call,
     Unary,
 )
 from statement import (
@@ -21,8 +22,10 @@ from statement import (
     Continue,
     Declaration,
     Expression,
+    Function,
     If,
     Print,
+    Return,
     Statem,
     While,
 )
@@ -38,6 +41,11 @@ class ControlFlowEnum(enum.Enum):
 class Value:
     type: TypeEnum
     py_value: Union[bool, float, int]
+
+
+@dataclasses.dataclass
+class ReturnException(Exception):
+    value: Optional[Value]
 
 
 @dataclasses.dataclass
@@ -126,9 +134,7 @@ def execute(  # type: ignore[return]
             declaration_result = None
 
             if initializer is not None:
-                environment, declaration_result = evaluate(
-                    interpreter.environment, initializer
-                )
+                interpreter, declaration_result = evaluate(interpreter, initializer)
 
             interpreter.environment = define(
                 interpreter.environment, name.text, declaration_result
@@ -136,9 +142,7 @@ def execute(  # type: ignore[return]
             return interpreter, [], ControlFlowEnum.NONE
 
         case Expression(expression):
-            interpreter.environment, expression_result = evaluate(
-                interpreter.environment, expression
-            )
+            interpreter, expression_result = evaluate(interpreter, expression)
 
             if isinstance(expression_result, list):
                 return interpreter, expression_result, ControlFlowEnum.NONE
@@ -151,10 +155,14 @@ def execute(  # type: ignore[return]
                 ControlFlowEnum.NONE,
             )
 
-        case If(condition, then_branch, else_branch):
-            interpreter.environment, if_predicate = evaluate(
-                interpreter.environment, condition
+        case Function(name, parameter_names, parameter_types, return_type, body):
+            interpreter.environment = define(
+                interpreter.environment, name.text, statement
             )
+            return interpreter, [], ControlFlowEnum.NONE
+
+        case If(condition, then_branch, else_branch):
+            interpreter, if_predicate = evaluate(interpreter, condition)
 
             if if_predicate is not None and if_predicate.py_value:
                 return execute(interpreter, then_branch, is_loop)
@@ -165,9 +173,7 @@ def execute(  # type: ignore[return]
             return interpreter, [], ControlFlowEnum.NONE
 
         case Print(expression):
-            interpreter.environment, print_result = evaluate(
-                interpreter.environment, expression
-            )
+            interpreter, print_result = evaluate(interpreter, expression)
 
             if isinstance(print_result, list):
                 return interpreter, print_result, ControlFlowEnum.NONE
@@ -178,13 +184,15 @@ def execute(  # type: ignore[return]
                 ControlFlowEnum.NONE,
             )
 
+        case Return(expression):
+            interpreter, value = evaluate(interpreter, expression)
+            raise ReturnException(value)
+
         case While(condition, body):
             while_result: List[str] = []
 
             while True:
-                interpreter.environment, while_predicate = evaluate(
-                    interpreter.environment, condition
-                )
+                interpreter, while_predicate = evaluate(interpreter, condition)
 
                 if while_predicate is None or not while_predicate.py_value:
                     break
@@ -240,139 +248,169 @@ def execute_block(
 
 
 def evaluate(  # type: ignore[return]
-    environment: Environment, expression: Expr
-) -> Tuple[Environment, Optional[Value]]:
+    interpreter: Interpreter,
+    expression: Expr,
+) -> Tuple[Interpreter, Optional[Value]]:
     match expression:
         case Boolean(value):
-            return environment, Value(
+            return interpreter, Value(
                 TypeEnum.BOOL, {"true": True, "false": False}[value]
             )
 
         case Float(value):
-            return environment, Value(TypeEnum.FLOAT, float(value))
+            return interpreter, Value(TypeEnum.FLOAT, float(value))
 
         case Integer(value):
-            return environment, Value(TypeEnum.INT, int(value))
+            return interpreter, Value(TypeEnum.INT, int(value))
 
         case Name(text):
-            return environment, get(environment, text)
+            return interpreter, get(interpreter.environment, text)
 
         case Assign(name, value):
-            environment, result = evaluate(environment, value)
-            return assign(environment, name.text, result), None
+            interpreter, result = evaluate(interpreter, value)
+            interpreter.environment = assign(interpreter.environment, name.text, result)
+
+            return interpreter, None
 
         case Binary(left, operator_enum, right):
-            environment, left_eval = evaluate(environment, left)
-            environment, right_eval = evaluate(environment, right)
+            interpreter, left_eval = evaluate(interpreter, left)
+            interpreter, right_eval = evaluate(interpreter, right)
             assert left_eval is not None and right_eval is not None
 
             assert left_eval.type == right_eval.type
 
             if operator_enum == OperatorEnum.PLUS:
                 if left_eval.type == TypeEnum.FLOAT:
-                    return environment, Value(
+                    return interpreter, Value(
                         TypeEnum.FLOAT, left_eval.py_value + right_eval.py_value
                     )
 
                 elif left_eval.type == TypeEnum.INT:
-                    return environment, Value(
+                    return interpreter, Value(
                         TypeEnum.INT, left_eval.py_value + right_eval.py_value
                     )
 
             elif operator_enum == OperatorEnum.MINUS:
                 if left_eval.type == TypeEnum.FLOAT:
-                    return environment, Value(
+                    return interpreter, Value(
                         TypeEnum.FLOAT, left_eval.py_value - right_eval.py_value
                     )
 
                 elif left_eval.type == TypeEnum.INT:
-                    return environment, Value(
+                    return interpreter, Value(
                         TypeEnum.INT, left_eval.py_value - right_eval.py_value
                     )
 
             elif operator_enum == OperatorEnum.TIMES:
                 if left_eval.type == TypeEnum.FLOAT:
-                    return environment, Value(
+                    return interpreter, Value(
                         TypeEnum.FLOAT, left_eval.py_value * right_eval.py_value
                     )
 
                 elif left_eval.type == TypeEnum.INT:
-                    return environment, Value(
+                    return interpreter, Value(
                         TypeEnum.INT, left_eval.py_value * right_eval.py_value
                     )
 
             elif operator_enum == OperatorEnum.DIVIDE:
                 if left_eval.type == TypeEnum.FLOAT:
-                    return environment, Value(
+                    return interpreter, Value(
                         TypeEnum.FLOAT, left_eval.py_value / right_eval.py_value
                     )
 
                 elif left_eval.type == TypeEnum.INT:
-                    return environment, Value(
+                    return interpreter, Value(
                         TypeEnum.INT, left_eval.py_value // right_eval.py_value
                     )
 
             elif operator_enum == OperatorEnum.EQUAL_EQUAL:
                 if left_eval.type in {TypeEnum.FLOAT, TypeEnum.INT, TypeEnum.BOOL}:
-                    return environment, Value(
+                    return interpreter, Value(
                         TypeEnum.BOOL, left_eval.py_value == right_eval.py_value
                     )
 
             elif operator_enum == OperatorEnum.LESS:
                 if left_eval.type in {TypeEnum.FLOAT, TypeEnum.INT, TypeEnum.BOOL}:
-                    return environment, Value(
+                    return interpreter, Value(
                         TypeEnum.BOOL, left_eval.py_value < right_eval.py_value
                     )
 
             elif operator_enum == OperatorEnum.LESS_EQUAL:
                 if left_eval.type in {TypeEnum.FLOAT, TypeEnum.INT, TypeEnum.BOOL}:
-                    return environment, Value(
+                    return interpreter, Value(
                         TypeEnum.BOOL, left_eval.py_value <= right_eval.py_value
                     )
 
             elif operator_enum == OperatorEnum.GREATER:
                 if left_eval.type in {TypeEnum.FLOAT, TypeEnum.INT, TypeEnum.BOOL}:
-                    return environment, Value(
+                    return interpreter, Value(
                         TypeEnum.BOOL, left_eval.py_value > right_eval.py_value
                     )
 
             elif operator_enum == OperatorEnum.GREATER_EQUAL:
                 if left_eval.type in {TypeEnum.FLOAT, TypeEnum.INT, TypeEnum.BOOL}:
-                    return environment, Value(
+                    return interpreter, Value(
                         TypeEnum.BOOL, left_eval.py_value >= right_eval.py_value
                     )
 
             elif operator_enum == OperatorEnum.AND:
                 if left_eval.type == TypeEnum.BOOL:
-                    return environment, Value(
+                    return interpreter, Value(
                         TypeEnum.BOOL, left_eval.py_value and right_eval.py_value
                     )
 
             elif operator_enum == OperatorEnum.OR:
                 if left_eval.type == TypeEnum.BOOL:
-                    return environment, Value(
+                    return interpreter, Value(
                         TypeEnum.BOOL, left_eval.py_value or right_eval.py_value
                     )
 
+        case Call(callee, arguments):
+            args = []
+            interpreter, caller = evaluate(interpreter, callee)
+
+            for argument in arguments:
+                interpreter, individual_argument = evaluate(interpreter, argument)
+                args.append(individual_argument)
+
+            return call(interpreter, caller, args)
+
         case Grouping(expression):
-            return evaluate(environment, expression)
+            return evaluate(interpreter, expression)
 
         case Unary(operator_enum, right):
-            environment, right_eval = evaluate(environment, right)
+            interpreter, right_eval = evaluate(interpreter, right)
             assert right_eval is not None
 
             if operator_enum == OperatorEnum.MINUS:
                 if right_eval.type == TypeEnum.FLOAT:
-                    return environment, Value(TypeEnum.FLOAT, -right_eval.py_value)
+                    return interpreter, Value(TypeEnum.FLOAT, -right_eval.py_value)
 
                 elif right_eval.type == TypeEnum.INT:
-                    return environment, Value(TypeEnum.INT, -right_eval.py_value)
+                    return interpreter, Value(TypeEnum.INT, -right_eval.py_value)
 
             elif operator_enum == OperatorEnum.NOT:
                 if right_eval.type == TypeEnum.BOOL:
-                    return environment, Value(TypeEnum.BOOL, not right_eval.py_value)
+                    return interpreter, Value(TypeEnum.BOOL, not right_eval.py_value)
 
         case _:
             raise Exception(
                 f"Exhaustive switch error on {expression.__class__.__name__}."
             )
+
+
+def call(interpreter, function, arguments):
+    environment = init_environment(interpreter.environment)
+
+    for i, parameter in enumerate(function.parameter_names):
+        environment = define(environment, parameter.text, arguments[i])
+
+    interpreter.environment = environment
+
+    try:
+        _, result = execute_block(interpreter, function.body.statements, False)
+
+    except ReturnException as return_value:
+        return interpreter, return_value.value
+
+    return interpreter, result

@@ -9,6 +9,7 @@ from expression import (
     Type,
     Assign,
     Binary,
+    Call,
     Grouping,
     Unary,
 )
@@ -19,8 +20,10 @@ from statement import (
     Continue,
     Declaration,
     Expression,
+    Function,
     If,
     Print,
+    Return,
     While,
 )
 
@@ -206,3 +209,23 @@ def test_evaluate():
     ]
 
     assert interpret(init_interpreter(statements)) == ["5", "4", "3", "2", "1"]
+
+    # program 8
+    statements = [
+        Function(
+            Name("add"),
+            [Name("x"), Name("y")],
+            [Type(TypeEnum.INT), Type(TypeEnum.INT)],
+            Type(TypeEnum.INT),
+            Block([Return(Binary(Name("x"), OperatorEnum.PLUS, Name("y")))]),
+        ),
+        Declaration(
+            Name("result"),
+            DeclarationEnum.VAR,
+            None,
+            Call(Name("add"), [Integer("2"), Integer("3")]),
+        ),
+        Print(Name("result")),
+    ]
+
+    assert interpret(init_interpreter(statements)) == ["5"]
