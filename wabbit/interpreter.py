@@ -51,11 +51,11 @@ class ReturnException(Exception):
 @dataclasses.dataclass
 class Environment:
     environment: Optional["Environment"]
-    values: Dict[str, Optional[Value]]
+    values: Dict[str, Union[Value, Function, None]]
 
 
 def init_environment(environment: Optional["Environment"] = None) -> Environment:
-    values: Dict[str, Optional[Value]] = {}
+    values: Dict[str, Union[Value, Function, None]] = {}
 
     if environment is not None:
         individual_environment = environment.environment
@@ -68,12 +68,14 @@ def init_environment(environment: Optional["Environment"] = None) -> Environment
     return Environment(environment=environment, values=values)
 
 
-def define(environment: Environment, name: str, value: Optional[Value]) -> Environment:
+def define(
+    environment: Environment, name: str, value: Union[Value, Function, None]
+) -> Environment:
     environment.values[name] = value
     return environment
 
 
-def get(environment: Environment, name: str) -> Optional[Value]:
+def get(environment: Environment, name: str) -> Union[Value, Function, None]:
     if name in environment.values:
         return environment.values[name]
 
@@ -121,7 +123,8 @@ def execute(  # type: ignore[return]
 ) -> Tuple[Interpreter, List[str], ControlFlowEnum]:
     match statement:
         case Block(statements):
-            return execute_block(interpreter, statements, is_loop)
+            environment = init_environment(interpreter.environment)
+            return execute_block(interpreter, statements, environment, is_loop)
 
         case Break():
             return interpreter, [], ControlFlowEnum.BREAK
@@ -155,7 +158,7 @@ def execute(  # type: ignore[return]
                 ControlFlowEnum.NONE,
             )
 
-        case Function(name, parameter_names, parameter_types, return_type, body):
+        case Function(name, _, _, _, _):
             interpreter.environment = define(
                 interpreter.environment, name.text, statement
             )
@@ -219,13 +222,14 @@ def execute(  # type: ignore[return]
 def execute_block(
     interpreter: Interpreter,
     statements: List[Statem],
+    environment: Environment,
     is_loop: bool,
 ) -> Tuple[Interpreter, List[str], ControlFlowEnum]:
     result: List[str] = []
     previous = interpreter.environment
 
     try:
-        interpreter.environment = init_environment(interpreter.environment)
+        interpreter.environment = environment
 
         for statement in statements:
             interpreter, individual_result, control_flow_enum = execute(
@@ -264,11 +268,13 @@ def evaluate(  # type: ignore[return]
             return interpreter, Value(TypeEnum.INT, int(value))
 
         case Name(text):
-            return interpreter, get(interpreter.environment, text)
+            return interpreter, get(interpreter.environment, text)  # type: ignore[return-value]
 
         case Assign(name, value):
-            interpreter, result = evaluate(interpreter, value)
-            interpreter.environment = assign(interpreter.environment, name.text, result)
+            interpreter, assign_eval = evaluate(interpreter, value)
+            interpreter.environment = assign(
+                interpreter.environment, name.text, assign_eval
+            )
 
             return interpreter, None
 
@@ -367,13 +373,13 @@ def evaluate(  # type: ignore[return]
 
         case Call(callee, arguments):
             args = []
-            interpreter, caller = evaluate(interpreter, callee)
+            interpreter, function = evaluate(interpreter, callee)
 
             for argument in arguments:
                 interpreter, individual_argument = evaluate(interpreter, argument)
                 args.append(individual_argument)
 
-            return call(interpreter, caller, args)
+            return call(interpreter, function, args)
 
         case Grouping(expression):
             return evaluate(interpreter, expression)
@@ -405,10 +411,10 @@ def call(interpreter, function, arguments):
     for i, parameter in enumerate(function.parameter_names):
         environment = define(environment, parameter.text, arguments[i])
 
-    interpreter.environment = environment
-
     try:
-        _, result = execute_block(interpreter, function.body.statements, False)
+        _, result = execute_block(
+            interpreter, function.body.statements, environment, False
+        )
 
     except ReturnException as return_value:
         return interpreter, return_value.value
