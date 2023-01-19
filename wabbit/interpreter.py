@@ -85,7 +85,9 @@ def get(environment: Environment, name: str) -> Union[Value, Function, None]:
     raise Exception("Name not found across all environments.")
 
 
-def assign(environment: Environment, name: str, value: Optional[Value]) -> Environment:
+def assign(
+    environment: Environment, name: str, value: Union[Value, Function, None]
+) -> Environment:
     if name in environment.values:
         environment.values[name] = value
         return environment
@@ -118,6 +120,7 @@ def interpret(interpreter: Interpreter) -> List[str]:
     return result
 
 
+# TODO: Implement void return for execution of statements.
 def execute(  # type: ignore[return]
     interpreter: Interpreter, statement: Statem, is_loop: bool
 ) -> Tuple[Interpreter, List[str], ControlFlowEnum]:
@@ -134,27 +137,26 @@ def execute(  # type: ignore[return]
 
         # TODO: Implement storing of const vs var type.
         case Declaration(name, _, _, initializer):
-            declaration_result = None
+            declaration_eval = None
 
             if initializer is not None:
-                interpreter, declaration_result = evaluate(interpreter, initializer)
+                interpreter, declaration_eval = evaluate(interpreter, initializer)
 
             interpreter.environment = define(
-                interpreter.environment, name.text, declaration_result
+                interpreter.environment, name.text, declaration_eval
             )
             return interpreter, [], ControlFlowEnum.NONE
 
         case Expression(expression):
-            interpreter, expression_result = evaluate(interpreter, expression)
+            interpreter, expression_eval = evaluate(interpreter, expression)
+            assert not isinstance(expression_eval, Function)
 
-            if isinstance(expression_result, list):
-                return interpreter, expression_result, ControlFlowEnum.NONE
+            if isinstance(expression_eval, list):
+                return interpreter, expression_eval, ControlFlowEnum.NONE
 
             return (
                 interpreter,
-                [str(expression_result.py_value)]
-                if expression_result is not None
-                else [],
+                [str(expression_eval.py_value)] if expression_eval is not None else [],
                 ControlFlowEnum.NONE,
             )
 
@@ -165,9 +167,10 @@ def execute(  # type: ignore[return]
             return interpreter, [], ControlFlowEnum.NONE
 
         case If(condition, then_branch, else_branch):
-            interpreter, if_predicate = evaluate(interpreter, condition)
+            interpreter, if_eval = evaluate(interpreter, condition)
+            assert not isinstance(if_eval, Function)
 
-            if if_predicate is not None and if_predicate.py_value:
+            if if_eval is not None and if_eval.py_value:
                 return execute(interpreter, then_branch, is_loop)
 
             elif else_branch is not None:
@@ -176,28 +179,32 @@ def execute(  # type: ignore[return]
             return interpreter, [], ControlFlowEnum.NONE
 
         case Print(expression):
-            interpreter, print_result = evaluate(interpreter, expression)
+            interpreter, print_eval = evaluate(interpreter, expression)
+            assert not isinstance(print_eval, Function)
 
-            if isinstance(print_result, list):
-                return interpreter, print_result, ControlFlowEnum.NONE
+            if isinstance(print_eval, list):
+                return interpreter, print_eval, ControlFlowEnum.NONE
 
             return (
                 interpreter,
-                [str(print_result.py_value) if print_result is not None else "nil"],
+                [str(print_eval.py_value) if print_eval is not None else "nil"],
                 ControlFlowEnum.NONE,
             )
 
         case Return(expression):
-            interpreter, value = evaluate(interpreter, expression)
-            raise ReturnException(value)
+            interpreter, return_eval = evaluate(interpreter, expression)
+            assert not isinstance(return_eval, Function)
+
+            raise ReturnException(return_eval)
 
         case While(condition, body):
             while_result: List[str] = []
 
             while True:
-                interpreter, while_predicate = evaluate(interpreter, condition)
+                interpreter, while_eval = evaluate(interpreter, condition)
+                assert not isinstance(while_eval, Function)
 
-                if while_predicate is None or not while_predicate.py_value:
+                if while_eval is None or not while_eval.py_value:
                     break
 
                 interpreter, individual_result, control_flow_enum = execute(
@@ -254,7 +261,7 @@ def execute_block(
 def evaluate(  # type: ignore[return]
     interpreter: Interpreter,
     expression: Expr,
-) -> Tuple[Interpreter, Optional[Value]]:
+) -> Tuple[Interpreter, Union[Value, Function, None]]:
     match expression:
         case Boolean(value):
             return interpreter, Value(
@@ -268,7 +275,7 @@ def evaluate(  # type: ignore[return]
             return interpreter, Value(TypeEnum.INT, int(value))
 
         case Name(text):
-            return interpreter, get(interpreter.environment, text)  # type: ignore[return-value]
+            return interpreter, get(interpreter.environment, text)
 
         case Assign(name, value):
             interpreter, assign_eval = evaluate(interpreter, value)
@@ -281,8 +288,8 @@ def evaluate(  # type: ignore[return]
         case Binary(left, operator_enum, right):
             interpreter, left_eval = evaluate(interpreter, left)
             interpreter, right_eval = evaluate(interpreter, right)
-            assert left_eval is not None and right_eval is not None
 
+            assert isinstance(left_eval, Value) and isinstance(right_eval, Value)
             assert left_eval.type == right_eval.type
 
             if operator_enum == OperatorEnum.PLUS:
@@ -373,20 +380,20 @@ def evaluate(  # type: ignore[return]
 
         case Call(callee, arguments):
             args = []
-            interpreter, function = evaluate(interpreter, callee)
+            interpreter, call_eval = evaluate(interpreter, callee)
 
             for argument in arguments:
                 interpreter, individual_argument = evaluate(interpreter, argument)
                 args.append(individual_argument)
 
-            return call(interpreter, function, args)
+            return call(interpreter, call_eval, args)
 
         case Grouping(expression):
             return evaluate(interpreter, expression)
 
         case Unary(operator_enum, right):
             interpreter, right_eval = evaluate(interpreter, right)
-            assert right_eval is not None
+            assert isinstance(right_eval, Value)
 
             if operator_enum == OperatorEnum.MINUS:
                 if right_eval.type == TypeEnum.FLOAT:
