@@ -78,7 +78,7 @@ def variable_declaration(parser: Parser) -> Tuple[Parser, Statem]:
     parser, is_equal = match(parser, [TokenType.EQUAL])
 
     if is_equal:
-        parser, initializer = factor(parser)
+        parser, initializer = term(parser)
 
     if declaration_enum == DeclarationEnum.CONST and not is_equal:
         raise ParseError("Require const to have a value.")
@@ -166,7 +166,7 @@ def while_statement(parser: Parser) -> Tuple[Parser, Statem]:
 
 
 def print_statement(parser: Parser) -> Tuple[Parser, Statem]:
-    parser, individual_expression = factor(parser)
+    parser, individual_expression = term(parser)
 
     parser, _ = consume(
         parser, TokenType.SEMICOLON, "Expect ';' after print statement."
@@ -190,11 +190,27 @@ def block(parser: Parser) -> Tuple[Parser, List[Statem]]:
 
 
 def expression_statement(parser: Parser) -> Tuple[Parser, Statem]:
-    parser, individual_expression = factor(parser)
+    parser, individual_expression = term(parser)
 
     parser, _ = consume(parser, TokenType.SEMICOLON, "Expect ';' after expression.")
 
     return parser, Expression(individual_expression)
+
+
+def term(parser: Parser) -> Tuple[Parser, Expr]:
+    parser, factor_expression = factor(parser)
+
+    while True:
+        parser, is_term = match(parser, [TokenType.PLUS, TokenType.MINUS])
+
+        if not is_term:
+            break
+
+        operator = OperatorEnum(previous(parser).lexeme)
+        parser, right = factor(parser)
+        factor_expression = Binary(factor_expression, operator, right)
+
+    return parser, factor_expression
 
 
 def factor(parser: Parser) -> Tuple[Parser, Expr]:
