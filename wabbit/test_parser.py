@@ -68,3 +68,32 @@ const a int = 1;
     assert statements[1].value_type == Type(TypeEnum.INT)
     assert isinstance(statements[1].initializer, Integer)
     assert statements[1].initializer.value == "1"
+
+    # program 6
+    statements = source_to_statements(
+        """\
+var x int = 1;
+var x = 1;
+var x int;
+"""
+    )
+
+    assert isinstance(statements[0], Declaration)
+    assert statements[0].name == Name("x")
+    assert statements[0].declaration_enum == DeclarationEnum.VAR
+    assert statements[0].value_type == Type(TypeEnum.INT)
+    assert isinstance(statements[0].initializer, Integer)
+    assert statements[0].initializer.value == "1"
+
+    assert isinstance(statements[1], Declaration)
+    assert statements[1].name == Name("x")
+    assert statements[1].declaration_enum == DeclarationEnum.VAR
+    assert statements[1].value_type is None
+    assert isinstance(statements[1].initializer, Integer)
+    assert statements[1].initializer.value == "1"
+
+    assert isinstance(statements[2], Declaration)
+    assert statements[2].name == Name("x")
+    assert statements[2].declaration_enum == DeclarationEnum.VAR
+    assert statements[2].value_type == Type(TypeEnum.INT)
+    assert statements[2].initializer is None

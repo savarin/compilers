@@ -48,13 +48,13 @@ def variable_declaration(parser: Parser) -> Tuple[Parser, Statem]:
         parser, scanner.TokenType.IDENTIFIER, "Expect variable name."
     )
 
-    var_type = None
-    parser, is_var_type = match(
+    value_type = None
+    parser, is_value_type = match(
         parser, [scanner.TokenType.BOOL, scanner.TokenType.INT, scanner.TokenType.FLOAT]
     )
 
-    if is_var_type:
-        var_type = Type(TypeEnum(previous(parser).token_type.value))
+    if is_value_type:
+        value_type = Type(TypeEnum(previous(parser).token_type.value))
 
     initializer = None
     parser, is_equal = match(parser, [scanner.TokenType.EQUAL])
@@ -62,12 +62,15 @@ def variable_declaration(parser: Parser) -> Tuple[Parser, Statem]:
     if is_equal:
         parser, initializer = expression(parser)
 
+    if declaration_enum == DeclarationEnum.CONST and not is_equal:
+        raise ParseError("Require const to have a value.")
+
     parser, _ = consume(
         parser, scanner.TokenType.SEMICOLON, "Expect ';' after variable declaration."
     )
 
     return parser, Declaration(
-        Name(name.lexeme), declaration_enum, var_type, initializer
+        Name(name.lexeme), declaration_enum, value_type, initializer
     )
 
 
