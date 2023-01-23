@@ -12,6 +12,7 @@ from expression import (
     Name,
     Type,
     Binary,
+    Unary,
 )
 from statement import (
     DeclarationEnum,
@@ -197,7 +198,7 @@ def expression_statement(parser: Parser) -> Tuple[Parser, Statem]:
 
 
 def factor(parser: Parser) -> Tuple[Parser, Expr]:
-    parser, primary_expression = primary(parser)
+    parser, unary_expression = unary(parser)
 
     while True:
         parser, is_factor = match(parser, [TokenType.STAR, TokenType.SLASH])
@@ -206,10 +207,26 @@ def factor(parser: Parser) -> Tuple[Parser, Expr]:
             break
 
         operator = OperatorEnum(previous(parser).lexeme)
-        parser, right = primary(parser)
-        primary_expression = Binary(primary_expression, operator, right)
+        parser, right = unary(parser)
+        unary_expression = Binary(unary_expression, operator, right)
 
-    return parser, primary_expression
+    return parser, unary_expression
+
+
+def unary(parser: Parser) -> Tuple[Parser, Expr]:
+    # parser, primary_expression = primary(parser)
+
+    while True:
+        parser, is_unary = match(parser, [TokenType.PLUS, TokenType.MINUS])
+
+        if not is_unary:
+            break
+
+        operator = OperatorEnum(previous(parser).lexeme)
+        parser, right = unary(parser)
+        return parser, Unary(operator, right)
+
+    return primary(parser)
 
 
 def primary(parser: Parser) -> Tuple[Parser, Expr]:

@@ -190,3 +190,34 @@ print 1*2*3/x*y;
         + " operator_enum=<OperatorEnum.TIMES: '*'>,"
         + " right=Name(text='y')))"
     )
+
+    # program 12
+    statements = source_to_statements(
+        """\
+print -2;
+print +3;
+print -x*y;
+print x*-y;
+"""
+    )
+
+    assert str(statements[0]) == (
+        "Print(expression=Unary(operator_enum=<OperatorEnum.MINUS: '-'>,"
+        + " right=Integer(value='2')))"
+    )
+    assert str(statements[1]) == (
+        "Print(expression=Unary(operator_enum=<OperatorEnum.PLUS: '+'>,"
+        + " right=Integer(value='3')))"
+    )
+    assert str(statements[2]) == (
+        "Print(expression=Binary(left=Unary(operator_enum=<OperatorEnum.MINUS: '-'>,"
+        + " right=Name(text='x')),"
+        + " operator_enum=<OperatorEnum.TIMES: '*'>,"
+        + " right=Name(text='y')))"
+    )
+    assert str(statements[3]) == (
+        "Print(expression=Binary(left=Name(text='x'),"
+        + " operator_enum=<OperatorEnum.TIMES: '*'>,"
+        + " right=Unary(operator_enum=<OperatorEnum.MINUS: '-'>,"
+        + " right=Name(text='y'))))"
+    )
