@@ -59,3 +59,45 @@ def test_format():
     assert tokens[5].token_type == TokenType.NUMBER
     assert tokens[6].token_type == TokenType.SEMICOLON
     assert tokens[7].token_type == TokenType.EOF
+
+    tokens = scan(init_scanner("const pi = 3.14159\n"))
+    assert tokens[0].token_type == TokenType.CONST
+    assert tokens[1].token_type == TokenType.IDENTIFIER
+    assert tokens[2].token_type == TokenType.EQUAL
+    assert tokens[3].token_type == TokenType.NUMBER
+    assert tokens[4].token_type == TokenType.EOF
+
+    tokens = scan(init_scanner("const tau = 2.0 * pi\n"))
+    assert tokens[0].token_type == TokenType.CONST
+    assert tokens[1].token_type == TokenType.IDENTIFIER
+    assert tokens[2].token_type == TokenType.EQUAL
+    assert tokens[3].token_type == TokenType.NUMBER
+    assert tokens[4].token_type == TokenType.STAR
+    assert tokens[5].token_type == TokenType.IDENTIFIER
+    assert tokens[6].token_type == TokenType.EOF
+
+    tokens = scan(init_scanner("var radius = 4.0\n"))
+    assert tokens[0].token_type == TokenType.VAR
+    assert tokens[1].token_type == TokenType.IDENTIFIER
+    assert tokens[2].token_type == TokenType.EQUAL
+    assert tokens[3].token_type == TokenType.NUMBER
+    assert tokens[4].token_type == TokenType.EOF
+
+    tokens = scan(init_scanner("var perimeter float\n"))
+    assert tokens[0].token_type == TokenType.VAR
+    assert tokens[1].token_type == TokenType.IDENTIFIER
+    assert tokens[2].token_type == TokenType.IDENTIFIER
+    assert tokens[3].token_type == TokenType.EOF
+
+    tokens = scan(init_scanner("perimeter = tau * radius\n"))
+    assert tokens[0].token_type == TokenType.IDENTIFIER
+    assert tokens[1].token_type == TokenType.EQUAL
+    assert tokens[2].token_type == TokenType.IDENTIFIER
+    assert tokens[3].token_type == TokenType.STAR
+    assert tokens[4].token_type == TokenType.IDENTIFIER
+    assert tokens[5].token_type == TokenType.EOF
+
+    tokens = scan(init_scanner("print perimeter\n"))
+    assert tokens[0].token_type == TokenType.PRINT
+    assert tokens[1].token_type == TokenType.IDENTIFIER
+    assert tokens[2].token_type == TokenType.EOF

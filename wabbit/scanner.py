@@ -13,18 +13,30 @@ class TokenType(enum.Enum):
     STAR = "STAR"
     SLASH = "SLASH"
 
+    # One or two character tokens.
+    EQUAL = "EQUAL"
+
     # Literals.
     NUMBER = "NUMBER"
     IDENTIFIER = "IDENTIFIER"
 
     # Keywords.
     PRINT = "PRINT"
+    CONST = "CONST"
+    VAR = "VAR"
+
+    # Types
+    BOOL = "BOOL"
+    INT = "INT"
+    FLOAT = "FLOAT"
 
     EOF = "EOF"
 
 
 keywords: Dict[str, TokenType] = {
     "print": TokenType.PRINT,
+    "const": TokenType.CONST,
+    "var": TokenType.VAR,
 }
 
 
@@ -77,6 +89,9 @@ def scan_token(scanner: Scanner) -> Scanner:
         scanner = add_token(scanner, TokenType.STAR)
     elif character == "/":
         scanner = add_token(scanner, TokenType.SLASH)
+
+    elif character == "=":
+        scanner = add_token(scanner, TokenType.EQUAL)
 
     elif character == "\n":
         scanner.line += 1
