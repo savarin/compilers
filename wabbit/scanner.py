@@ -6,6 +6,7 @@ import enum
 class TokenType(enum.Enum):
     # Single-character tokens.
     SEMICOLON = "SEMICOLON"
+    COMMA = "COMMA"
     PLUS = "PLUS"
     MINUS = "MINUS"
     STAR = "STAR"
@@ -41,6 +42,8 @@ class TokenType(enum.Enum):
     FALSE = "FALSE"
     IF = "IF"
     WHILE = "WHILE"
+    FUNCTION = "FUNCTION"
+    RETURN = "RETURN"
 
     # Types
     BOOL = "BOOL"
@@ -61,6 +64,8 @@ keywords: Dict[str, TokenType] = {
     "false": TokenType.FALSE,
     "if": TokenType.IF,
     "while": TokenType.WHILE,
+    "func": TokenType.FUNCTION,
+    "return": TokenType.RETURN,
 }
 
 
@@ -101,6 +106,8 @@ def scan_token(scanner: Scanner) -> Scanner:
 
     if character == ";":
         scanner = add_token(scanner, TokenType.SEMICOLON)
+    elif character == ",":
+        scanner = add_token(scanner, TokenType.COMMA)
     elif character == "+":
         scanner = add_token(scanner, TokenType.PLUS)
     elif character == "-":

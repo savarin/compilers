@@ -308,3 +308,48 @@ while true {
     assert tokens[34].token_type == TokenType.NUMBER
     assert tokens[35].token_type == TokenType.SEMICOLON
     assert tokens[36].token_type == TokenType.EOF
+
+    # program 8
+    tokens = scan(
+        init_scanner(
+            """\
+func add(x int, y int) int {
+    return x + y;
+}
+
+var result = add(2, 3);
+print result;          
+"""
+        )
+    )
+    assert tokens[0].token_type == TokenType.FUNCTION
+    assert tokens[1].token_type == TokenType.IDENTIFIER
+    assert tokens[2].token_type == TokenType.LEFT_PAREN
+    assert tokens[3].token_type == TokenType.IDENTIFIER
+    assert tokens[4].token_type == TokenType.INT
+    assert tokens[5].token_type == TokenType.COMMA
+    assert tokens[6].token_type == TokenType.IDENTIFIER
+    assert tokens[7].token_type == TokenType.INT
+    assert tokens[8].token_type == TokenType.RIGHT_PAREN
+    assert tokens[9].token_type == TokenType.INT
+    assert tokens[10].token_type == TokenType.LEFT_BRACE
+    assert tokens[11].token_type == TokenType.RETURN
+    assert tokens[12].token_type == TokenType.IDENTIFIER
+    assert tokens[13].token_type == TokenType.PLUS
+    assert tokens[14].token_type == TokenType.IDENTIFIER
+    assert tokens[15].token_type == TokenType.SEMICOLON
+    assert tokens[16].token_type == TokenType.RIGHT_BRACE
+    assert tokens[17].token_type == TokenType.VAR
+    assert tokens[18].token_type == TokenType.IDENTIFIER
+    assert tokens[19].token_type == TokenType.EQUAL
+    assert tokens[20].token_type == TokenType.IDENTIFIER
+    assert tokens[21].token_type == TokenType.LEFT_PAREN
+    assert tokens[22].token_type == TokenType.NUMBER
+    assert tokens[23].token_type == TokenType.COMMA
+    assert tokens[24].token_type == TokenType.NUMBER
+    assert tokens[25].token_type == TokenType.RIGHT_PAREN
+    assert tokens[26].token_type == TokenType.SEMICOLON
+    assert tokens[27].token_type == TokenType.PRINT
+    assert tokens[28].token_type == TokenType.IDENTIFIER
+    assert tokens[29].token_type == TokenType.SEMICOLON
+    assert tokens[30].token_type == TokenType.EOF
