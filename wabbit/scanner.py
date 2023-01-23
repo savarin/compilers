@@ -1,11 +1,17 @@
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple, Union
 import dataclasses
 import enum
 
 
 class TokenType(enum.Enum):
     # Single-character tokens.
+    LEFT_PAREN = "LEFT_PAREN"
+    RIGHT_PAREN = "RIGHT_PAREN"
     SEMICOLON = "SEMICOLON"
+    PLUS = "PLUS"
+    MINUS = "MINUS"
+    STAR = "STAR"
+    SLASH = "SLASH"
 
     # Literals.
     NUMBER = "NUMBER"
@@ -26,7 +32,7 @@ keywords: Dict[str, TokenType] = {
 class Token:
     token_type: TokenType
     lexeme: str
-    literal: Optional[int]
+    literal: Union[int, float, None]
     line: int
 
 
@@ -59,6 +65,18 @@ def scan_token(scanner: Scanner) -> Scanner:
 
     if character == ";":
         scanner = add_token(scanner, TokenType.SEMICOLON)
+    elif character == "(":
+        scanner = add_token(scanner, TokenType.LEFT_PAREN)
+    elif character == ")":
+        scanner = add_token(scanner, TokenType.RIGHT_PAREN)
+    elif character == "+":
+        scanner = add_token(scanner, TokenType.PLUS)
+    elif character == "-":
+        scanner = add_token(scanner, TokenType.MINUS)
+    elif character == "*":
+        scanner = add_token(scanner, TokenType.STAR)
+    elif character == "/":
+        scanner = add_token(scanner, TokenType.SLASH)
 
     elif character == "\n":
         scanner.line += 1
@@ -79,7 +97,7 @@ def scan_token(scanner: Scanner) -> Scanner:
 
 
 def add_token(
-    scanner: Scanner, token_type: TokenType, literal: Optional[int] = None
+    scanner: Scanner, token_type: TokenType, literal: Union[int, float, None] = None
 ) -> Scanner:
     scanner.tokens.append(Token(token_type, current(scanner), literal, scanner.line))
 
@@ -104,6 +122,13 @@ def peek(scanner: Scanner) -> str:
     return scanner.source[scanner.current]
 
 
+def peek_next(scanner: Scanner) -> str:
+    if scanner.current + 1 >= len(scanner.source):
+        return "\0"
+
+    return scanner.source[scanner.current + 1]
+
+
 def is_at_end(scanner: Scanner) -> bool:
     return scanner.current == len(scanner.source)
 
@@ -117,10 +142,20 @@ def is_alpha(character: str) -> bool:
 
 
 def number(scanner: Scanner) -> Scanner:
+    is_float = False
+
     while is_digit(peek(scanner)):
         scanner, _ = advance(scanner)
 
-    return add_token(scanner, TokenType.NUMBER, int(current(scanner)))
+    if peek(scanner) == "." and is_digit(peek_next(scanner)):
+        is_float = True
+        scanner, _ = advance(scanner)
+
+        while is_digit(peek(scanner)):
+            scanner, _ = advance(scanner)
+
+    literal = float(current(scanner)) if is_float else int(current(scanner))
+    return add_token(scanner, TokenType.NUMBER, literal)
 
 
 def identifier(scanner: Scanner) -> Scanner:
