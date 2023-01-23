@@ -2,7 +2,7 @@ from typing import List, Tuple
 import dataclasses
 
 from scanner import TokenType, Token
-from expression import TypeEnum, Expr, Boolean, Integer, Name, Type
+from expression import TypeEnum, Expr, Boolean, Integer, Float, Name, Type
 from statement import (
     DeclarationEnum,
     Statem,
@@ -188,7 +188,15 @@ def expression_statement(parser: Parser) -> Tuple[Parser, Statem]:
 def expression(parser: Parser) -> Tuple[Parser, Expr]:
     parser, token = advance(parser)
 
-    return parser, Integer(token.lexeme)
+    if token.token_type == TokenType.NUMBER:
+        return parser, Float(token.lexeme) if "." in token.lexeme else Integer(
+            token.lexeme
+        )
+
+    elif token.token_type in [TokenType.TRUE, TokenType.FALSE]:
+        return parser, Boolean(token.lexeme)
+
+    return parser, Name(token.lexeme)
 
 
 def match(parser: Parser, token_types: List[TokenType]) -> Tuple[Parser, bool]:

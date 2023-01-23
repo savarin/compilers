@@ -133,3 +133,20 @@ while true { print 2; }
     statements = source_to_statements("1;")
 
     assert str(statements[0]) == "Expression(expression=Integer(value='1'))"
+
+    # program 10
+    statements = source_to_statements(
+        """\
+print 1;
+print 1.5;
+print true;
+print false;
+print x;
+"""
+    )
+
+    assert str(statements[0]) == "Print(expression=Integer(value='1'))"
+    assert str(statements[1]) == "Print(expression=Float(value='1.5'))"
+    assert str(statements[2]) == "Print(expression=Boolean(value='true'))"
+    assert str(statements[3]) == "Print(expression=Boolean(value='false'))"
+    assert str(statements[4]) == "Print(expression=Name(text='x'))"
