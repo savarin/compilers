@@ -2,8 +2,8 @@ from typing import List
 
 from parser import init_parser, parse
 from scanner import init_scanner, scan
-from expression import TypeEnum, Integer, Name, Type
-from statement import DeclarationEnum, Statem, Break, Continue, Print, Declaration
+from expression import TypeEnum, Boolean, Integer, Name, Type
+from statement import DeclarationEnum, Statem, Break, Continue, Print, Declaration, If
 
 
 def source_to_statements(source: str) -> List[Statem]:
@@ -97,3 +97,22 @@ var x int;
     assert statements[2].declaration_enum == DeclarationEnum.VAR
     assert statements[2].value_type == Type(TypeEnum.INT)
     assert statements[2].initializer is None
+
+    # program 7
+    statements = source_to_statements(
+        """\
+if true { print 2; } else { print 3; }
+if true { print 2; }
+"""
+    )
+
+    assert str(statements[0]) == (
+        "If(condition=Boolean(value='true'),"
+        + " then_branch=Block(statements=[Print(expression=Integer(value='2'))]),"
+        + " else_branch=Block(statements=[Print(expression=Integer(value='3'))]))"
+    )
+    assert str(statements[1]) == (
+        "If(condition=Boolean(value='true'),"
+        + " then_branch=Block(statements=[Print(expression=Integer(value='2'))]),"
+        + " else_branch=None)"
+    )
