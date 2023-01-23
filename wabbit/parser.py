@@ -2,8 +2,8 @@ from typing import List, Tuple
 import dataclasses
 
 import scanner
-from expression import Expr, Integer
-from statement import Statem, Break, Continue, Print
+from expression import TypeEnum, Expr, Integer, Name, Type
+from statement import DeclarationEnum, Statem, Break, Continue, Print, Declaration
 
 
 class ParseError(Exception):
@@ -24,10 +24,51 @@ def parse(parser: Parser) -> List[Statem]:
     statements: List[Statem] = []
 
     while not is_at_end(parser):
-        parser, individual_statement = statement(parser)
+        parser, individual_statement = declaration(parser)
         statements.append(individual_statement)
 
     return statements
+
+
+def declaration(parser: Parser) -> Tuple[Parser, Statem]:
+    parser, is_variable = match(
+        parser, [scanner.TokenType.CONST, scanner.TokenType.VAR]
+    )
+
+    if is_variable:
+        return variable_declaration(parser)
+
+    return statement(parser)
+
+
+def variable_declaration(parser: Parser) -> Tuple[Parser, Statem]:
+    declaration_enum = DeclarationEnum(previous(parser).token_type.value)
+
+    parser, name = consume(
+        parser, scanner.TokenType.IDENTIFIER, "Expect variable name."
+    )
+
+    var_type = None
+    parser, is_var_type = match(
+        parser, [scanner.TokenType.BOOL, scanner.TokenType.INT, scanner.TokenType.FLOAT]
+    )
+
+    if is_var_type:
+        var_type = Type(TypeEnum(previous(parser).token_type.value))
+
+    initializer = None
+    parser, is_equal = match(parser, [scanner.TokenType.EQUAL])
+
+    if is_equal:
+        parser, initializer = expression(parser)
+
+    parser, _ = consume(
+        parser, scanner.TokenType.SEMICOLON, "Expect ';' after variable declaration."
+    )
+
+    return parser, Declaration(
+        Name(name.lexeme), declaration_enum, var_type, initializer
+    )
 
 
 def statement(parser: Parser) -> Tuple[Parser, Statem]:
