@@ -2,8 +2,8 @@ from typing import List
 
 from parser import init_parser, parse
 from scanner import init_scanner, scan
-from expression import TypeEnum, Boolean, Integer, Name, Type
-from statement import DeclarationEnum, Statem, Break, Continue, Print, Declaration, If
+from expression import TypeEnum, Integer, Name, Type
+from statement import DeclarationEnum, Statem, Break, Continue, Print, Declaration
 
 
 def source_to_statements(source: str) -> List[Statem]:
@@ -115,4 +115,16 @@ if true { print 2; }
         "If(condition=Boolean(value='true'),"
         + " then_branch=Block(statements=[Print(expression=Integer(value='2'))]),"
         + " else_branch=None)"
+    )
+
+    # program 8
+    statements = source_to_statements(
+        """\
+while true { print 2; }
+"""
+    )
+
+    assert str(statements[0]) == (
+        "While(condition=Boolean(value='true'),"
+        + " body=Block(statements=[Print(expression=Integer(value='2'))]))"
     )

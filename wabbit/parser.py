@@ -12,6 +12,7 @@ from statement import (
     Declaration,
     If,
     Block,
+    While,
 )
 
 
@@ -95,6 +96,11 @@ def statement(parser: Parser) -> Tuple[Parser, Statem]:
     if is_if:
         return if_statement(parser)
 
+    parser, is_while = match(parser, [TokenType.WHILE])
+
+    if is_while:
+        return while_statement(parser)
+
     parser, is_print = match(parser, [TokenType.PRINT])
 
     if is_print:
@@ -137,6 +143,14 @@ def if_statement(parser: Parser) -> Tuple[Parser, Statem]:
         parser, else_branch = statement(parser)
 
     return parser, If(Boolean("true"), then_branch, else_branch)
+
+
+def while_statement(parser: Parser) -> Tuple[Parser, Statem]:
+    parser, _ = consume(parser, TokenType.TRUE, "Expect 'true' after 'if'.")
+
+    parser, body = statement(parser)
+
+    return parser, While(Boolean("true"), body)
 
 
 def print_statement(parser: Parser) -> Tuple[Parser, Statem]:
