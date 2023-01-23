@@ -2,7 +2,17 @@ from typing import List, Tuple
 import dataclasses
 
 from scanner import TokenType, Token
-from expression import TypeEnum, Expr, Boolean, Integer, Float, Name, Type
+from expression import (
+    TypeEnum,
+    OperatorEnum,
+    Expr,
+    Boolean,
+    Integer,
+    Float,
+    Name,
+    Type,
+    Binary,
+)
 from statement import (
     DeclarationEnum,
     Statem,
@@ -67,7 +77,7 @@ def variable_declaration(parser: Parser) -> Tuple[Parser, Statem]:
     parser, is_equal = match(parser, [TokenType.EQUAL])
 
     if is_equal:
-        parser, initializer = expression(parser)
+        parser, initializer = factor(parser)
 
     if declaration_enum == DeclarationEnum.CONST and not is_equal:
         raise ParseError("Require const to have a value.")
@@ -155,9 +165,10 @@ def while_statement(parser: Parser) -> Tuple[Parser, Statem]:
 
 
 def print_statement(parser: Parser) -> Tuple[Parser, Statem]:
-    parser, individual_expression = expression(parser)
+    parser, individual_expression = factor(parser)
+
     parser, _ = consume(
-        parser, TokenType.SEMICOLON, "Expect ';' after continue statement."
+        parser, TokenType.SEMICOLON, "Expect ';' after print statement."
     )
 
     return parser, Print(individual_expression)
@@ -178,14 +189,30 @@ def block(parser: Parser) -> Tuple[Parser, List[Statem]]:
 
 
 def expression_statement(parser: Parser) -> Tuple[Parser, Statem]:
-    parser, individual_expression = expression(parser)
+    parser, individual_expression = factor(parser)
 
     parser, _ = consume(parser, TokenType.SEMICOLON, "Expect ';' after expression.")
 
     return parser, Expression(individual_expression)
 
 
-def expression(parser: Parser) -> Tuple[Parser, Expr]:
+def factor(parser: Parser) -> Tuple[Parser, Expr]:
+    parser, primary_expression = primary(parser)
+
+    while True:
+        parser, is_factor = match(parser, [TokenType.STAR, TokenType.SLASH])
+
+        if not is_factor:
+            break
+
+        operator = OperatorEnum(previous(parser).lexeme)
+        parser, right = primary(parser)
+        primary_expression = Binary(primary_expression, operator, right)
+
+    return parser, primary_expression
+
+
+def primary(parser: Parser) -> Tuple[Parser, Expr]:
     parser, token = advance(parser)
 
     if token.token_type == TokenType.NUMBER:
@@ -214,7 +241,7 @@ def consume(
     if expect(parser, token_type):
         return advance(parser)
 
-    raise ParseError()
+    raise ParseError(message)
 
 
 def advance(parser: Parser) -> Tuple[Parser, Token]:

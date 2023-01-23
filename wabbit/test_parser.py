@@ -150,3 +150,43 @@ print x;
     assert str(statements[2]) == "Print(expression=Boolean(value='true'))"
     assert str(statements[3]) == "Print(expression=Boolean(value='false'))"
     assert str(statements[4]) == "Print(expression=Name(text='x'))"
+
+    # program 11
+    statements = source_to_statements(
+        """\
+print 1*2;
+print x*y;
+print 1/2;
+print x/y;
+print 1*2*3/x*y;
+"""
+    )
+
+    assert str(statements[0]) == (
+        "Print(expression=Binary(left=Integer(value='1'),"
+        + " operator_enum=<OperatorEnum.TIMES: '*'>,"
+        + " right=Integer(value='2')))"
+    )
+    assert str(statements[1]) == (
+        "Print(expression=Binary(left=Name(text='x'),"
+        + " operator_enum=<OperatorEnum.TIMES: '*'>, right=Name(text='y')))"
+    )
+    assert str(statements[2]) == (
+        "Print(expression=Binary(left=Integer(value='1'),"
+        + " operator_enum=<OperatorEnum.DIVIDE: '/'>, right=Integer(value='2')))"
+    )
+    assert str(statements[3]) == (
+        "Print(expression=Binary(left=Name(text='x'),"
+        + " operator_enum=<OperatorEnum.DIVIDE: '/'>, right=Name(text='y')))"
+    )
+    assert str(statements[4]) == (
+        "Print(expression=Binary(left=Binary(left=Binary(left=Binary(left=Integer(value='1'),"
+        + " operator_enum=<OperatorEnum.TIMES: '*'>,"
+        + " right=Integer(value='2')),"
+        + " operator_enum=<OperatorEnum.TIMES: '*'>,"
+        + " right=Integer(value='3')),"
+        + " operator_enum=<OperatorEnum.DIVIDE: '/'>,"
+        + " right=Name(text='x')),"
+        + " operator_enum=<OperatorEnum.TIMES: '*'>,"
+        + " right=Name(text='y')))"
+    )
