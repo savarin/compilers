@@ -40,6 +40,7 @@ class TokenType(enum.Enum):
     TRUE = "TRUE"
     FALSE = "FALSE"
     IF = "IF"
+    WHILE = "WHILE"
 
     # Types
     BOOL = "BOOL"
@@ -59,6 +60,7 @@ keywords: Dict[str, TokenType] = {
     "true": TokenType.TRUE,
     "false": TokenType.FALSE,
     "if": TokenType.IF,
+    "while": TokenType.WHILE,
 }
 
 
