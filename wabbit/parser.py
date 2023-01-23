@@ -2,7 +2,8 @@ from typing import List, Tuple
 import dataclasses
 
 import scanner
-from statement import Statem, Break, Continue
+from expression import Expr, Integer
+from statement import Statem, Break, Continue, Print
 
 
 class ParseError(Exception):
@@ -40,11 +41,16 @@ def statement(parser: Parser) -> Tuple[Parser, Statem]:
     if is_continue:
         return continue_statement(parser)
 
+    parser, is_print = match(parser, [scanner.TokenType.PRINT])
+
+    if is_print:
+        return print_statement(parser)
+
     raise ParseError()
 
 
 def break_statement(parser: Parser) -> Tuple[Parser, Statem]:
-    parser = consume(
+    parser, _ = consume(
         parser, scanner.TokenType.SEMICOLON, "Expect ';' after break statement."
     )
 
@@ -52,17 +58,32 @@ def break_statement(parser: Parser) -> Tuple[Parser, Statem]:
 
 
 def continue_statement(parser: Parser) -> Tuple[Parser, Statem]:
-    parser = consume(
+    parser, _ = consume(
         parser, scanner.TokenType.SEMICOLON, "Expect ';' after continue statement."
     )
 
     return parser, Continue()
 
 
+def print_statement(parser: Parser) -> Tuple[Parser, Statem]:
+    parser, individual_expression = expression(parser)
+    parser, _ = consume(
+        parser, scanner.TokenType.SEMICOLON, "Expect ';' after continue statement."
+    )
+
+    return parser, Print(individual_expression)
+
+
+def expression(parser: Parser) -> Tuple[Parser, Expr]:
+    parser, token = advance(parser)
+
+    return parser, Integer(token.lexeme)
+
+
 def match(parser: Parser, token_types: List[scanner.TokenType]) -> Tuple[Parser, bool]:
     for token_type in token_types:
         if expect(parser, token_type):
-            parser = advance(parser)
+            parser, _ = advance(parser)
             return parser, True
 
     return parser, False
@@ -77,11 +98,11 @@ def consume(
     raise ParseError()
 
 
-def advance(parser: Parser) -> Parser:
+def advance(parser: Parser) -> Tuple[Parser, scanner.Token]:
     if not is_at_end(parser):
         parser.current += 1
 
-    return parser
+    return parser, previous(parser)
 
 
 def expect(parser: Parser, token_type: scanner.TokenType) -> bool:
@@ -93,6 +114,10 @@ def expect(parser: Parser, token_type: scanner.TokenType) -> bool:
 
 def peek(parser: Parser) -> scanner.Token:
     return parser.tokens[parser.current]
+
+
+def previous(parser: Parser) -> scanner.Token:
+    return parser.tokens[parser.current - 1]
 
 
 def is_at_end(parser: Parser) -> bool:
