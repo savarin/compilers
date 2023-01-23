@@ -5,13 +5,15 @@ import enum
 
 class TokenType(enum.Enum):
     # Single-character tokens.
-    LEFT_PAREN = "LEFT_PAREN"
-    RIGHT_PAREN = "RIGHT_PAREN"
     SEMICOLON = "SEMICOLON"
     PLUS = "PLUS"
     MINUS = "MINUS"
     STAR = "STAR"
     SLASH = "SLASH"
+    LEFT_PAREN = "LEFT_PAREN"
+    RIGHT_PAREN = "RIGHT_PAREN"
+    LEFT_BRACE = "LEFT_BRACE"
+    RIGHT_BRACE = "RIGHT_BRACE"
 
     # One or two character tokens.
     BANG = "BANG"
@@ -37,6 +39,7 @@ class TokenType(enum.Enum):
     VAR = "VAR"
     TRUE = "TRUE"
     FALSE = "FALSE"
+    IF = "IF"
 
     # Types
     BOOL = "BOOL"
@@ -47,11 +50,15 @@ class TokenType(enum.Enum):
 
 
 keywords: Dict[str, TokenType] = {
+    "bool": TokenType.BOOL,
+    "int": TokenType.INT,
+    "float": TokenType.FLOAT,
     "print": TokenType.PRINT,
     "const": TokenType.CONST,
     "var": TokenType.VAR,
     "true": TokenType.TRUE,
     "false": TokenType.FALSE,
+    "if": TokenType.IF,
 }
 
 
@@ -92,10 +99,6 @@ def scan_token(scanner: Scanner) -> Scanner:
 
     if character == ";":
         scanner = add_token(scanner, TokenType.SEMICOLON)
-    elif character == "(":
-        scanner = add_token(scanner, TokenType.LEFT_PAREN)
-    elif character == ")":
-        scanner = add_token(scanner, TokenType.RIGHT_PAREN)
     elif character == "+":
         scanner = add_token(scanner, TokenType.PLUS)
     elif character == "-":
@@ -104,6 +107,14 @@ def scan_token(scanner: Scanner) -> Scanner:
         scanner = add_token(scanner, TokenType.STAR)
     elif character == "/":
         scanner = add_token(scanner, TokenType.SLASH)
+    elif character == "(":
+        scanner = add_token(scanner, TokenType.LEFT_PAREN)
+    elif character == ")":
+        scanner = add_token(scanner, TokenType.RIGHT_PAREN)
+    elif character == "{":
+        scanner = add_token(scanner, TokenType.LEFT_BRACE)
+    elif character == "}":
+        scanner = add_token(scanner, TokenType.RIGHT_BRACE)
 
     elif character == "=":
         scanner = add_token(
