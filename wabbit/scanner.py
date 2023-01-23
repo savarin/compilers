@@ -134,25 +134,25 @@ def scan_token(scanner: Scanner) -> Scanner:
     elif character == "=":
         scanner = add_token(
             scanner,
-            TokenType.EQUAL_EQUAL if is_match(scanner, "=") else TokenType.EQUAL,
+            TokenType.EQUAL_EQUAL if match(scanner, "=") else TokenType.EQUAL,
         )
     elif character == "!":
         scanner = add_token(
-            scanner, TokenType.BANG_EQUAL if is_match(scanner, "=") else TokenType.BANG
+            scanner, TokenType.BANG_EQUAL if match(scanner, "=") else TokenType.BANG
         )
     elif character == "<":
         scanner = add_token(
             scanner,
-            TokenType.GREATER_EQUAL if is_match(scanner, "=") else TokenType.GREATER,
+            TokenType.GREATER_EQUAL if match(scanner, "=") else TokenType.GREATER,
         )
     elif character == ">":
         scanner = add_token(
-            scanner, TokenType.LESS_EQUAL if is_match(scanner, "=") else TokenType.LESS
+            scanner, TokenType.LESS_EQUAL if match(scanner, "=") else TokenType.LESS
         )
 
-    elif character == "&" and is_match(scanner, "&"):
+    elif character == "&" and match(scanner, "&"):
         scanner = add_token(scanner, TokenType.AND)
-    elif character == "|" and is_match(scanner, "|"):
+    elif character == "|" and match(scanner, "|"):
         scanner = add_token(scanner, TokenType.OR)
 
     elif character == "\n":
@@ -188,10 +188,6 @@ def advance(scanner: Scanner) -> Tuple[Scanner, str]:
     return scanner, character
 
 
-def current(scanner: Scanner) -> str:
-    return scanner.source[scanner.start : scanner.current]
-
-
 def peek(scanner: Scanner) -> str:
     if is_at_end(scanner):
         return "\0"
@@ -206,19 +202,7 @@ def peek_next(scanner: Scanner) -> str:
     return scanner.source[scanner.current + 1]
 
 
-def is_at_end(scanner: Scanner) -> bool:
-    return scanner.current == len(scanner.source)
-
-
-def is_digit(character: str) -> bool:
-    return "0" <= character <= "9"
-
-
-def is_alpha(character: str) -> bool:
-    return "a" <= character <= "z" or "A" <= character <= "Z" or character == "_"
-
-
-def is_match(scanner: Scanner, expected: str) -> bool:
+def match(scanner: Scanner, expected: str) -> bool:
     if is_at_end(scanner):
         return False
 
@@ -227,6 +211,22 @@ def is_match(scanner: Scanner, expected: str) -> bool:
 
     scanner.current += 1
     return True
+
+
+def current(scanner: Scanner) -> str:
+    return scanner.source[scanner.start : scanner.current]
+
+
+def identifier(scanner: Scanner) -> Scanner:
+    while is_digit(peek(scanner)) or is_alpha(peek(scanner)):
+        scanner, _ = advance(scanner)
+
+    token_type = keywords.get(current(scanner), None)
+
+    if token_type is None:
+        token_type = TokenType.IDENTIFIER
+
+    return add_token(scanner, token_type)
 
 
 def number(scanner: Scanner) -> Scanner:
@@ -246,13 +246,13 @@ def number(scanner: Scanner) -> Scanner:
     return add_token(scanner, TokenType.NUMBER, literal)
 
 
-def identifier(scanner: Scanner) -> Scanner:
-    while is_digit(peek(scanner)) or is_alpha(peek(scanner)):
-        scanner, _ = advance(scanner)
+def is_alpha(character: str) -> bool:
+    return "a" <= character <= "z" or "A" <= character <= "Z" or character == "_"
 
-    token_type = keywords.get(current(scanner), None)
 
-    if token_type is None:
-        token_type = TokenType.IDENTIFIER
+def is_digit(character: str) -> bool:
+    return "0" <= character <= "9"
 
-    return add_token(scanner, token_type)
+
+def is_at_end(scanner: Scanner) -> bool:
+    return scanner.current == len(scanner.source)
