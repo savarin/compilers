@@ -41,7 +41,10 @@ class TokenType(enum.Enum):
     TRUE = "TRUE"
     FALSE = "FALSE"
     IF = "IF"
+    ELSE = "ELSE"
     WHILE = "WHILE"
+    BREAK = "BREAK"
+    CONTINUE = "CONTINUE"
     FUNCTION = "FUNCTION"
     RETURN = "RETURN"
 
@@ -63,7 +66,10 @@ keywords: Dict[str, TokenType] = {
     "true": TokenType.TRUE,
     "false": TokenType.FALSE,
     "if": TokenType.IF,
+    "else": TokenType.ELSE,
     "while": TokenType.WHILE,
+    "break": TokenType.BREAK,
+    "continue": TokenType.CONTINUE,
     "func": TokenType.FUNCTION,
     "return": TokenType.RETURN,
 }

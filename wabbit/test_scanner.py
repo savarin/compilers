@@ -192,7 +192,7 @@ print minval;
     assert tokens[23].token_type == TokenType.IDENTIFIER
     assert tokens[24].token_type == TokenType.SEMICOLON
     assert tokens[25].token_type == TokenType.RIGHT_BRACE
-    assert tokens[26].token_type == TokenType.IDENTIFIER
+    assert tokens[26].token_type == TokenType.ELSE
     assert tokens[27].token_type == TokenType.LEFT_BRACE
     assert tokens[28].token_type == TokenType.IDENTIFIER
     assert tokens[29].token_type == TokenType.EQUAL
@@ -284,10 +284,10 @@ while true {
     assert tokens[10].token_type == TokenType.EQUAL_EQUAL
     assert tokens[11].token_type == TokenType.NUMBER
     assert tokens[12].token_type == TokenType.LEFT_BRACE
-    assert tokens[13].token_type == TokenType.IDENTIFIER
+    assert tokens[13].token_type == TokenType.BREAK
     assert tokens[14].token_type == TokenType.SEMICOLON
     assert tokens[15].token_type == TokenType.RIGHT_BRACE
-    assert tokens[16].token_type == TokenType.IDENTIFIER
+    assert tokens[16].token_type == TokenType.ELSE
     assert tokens[17].token_type == TokenType.LEFT_BRACE
     assert tokens[18].token_type == TokenType.PRINT
     assert tokens[19].token_type == TokenType.IDENTIFIER
@@ -298,7 +298,7 @@ while true {
     assert tokens[24].token_type == TokenType.MINUS
     assert tokens[25].token_type == TokenType.NUMBER
     assert tokens[26].token_type == TokenType.SEMICOLON
-    assert tokens[27].token_type == TokenType.IDENTIFIER
+    assert tokens[27].token_type == TokenType.CONTINUE
     assert tokens[28].token_type == TokenType.SEMICOLON
     assert tokens[29].token_type == TokenType.RIGHT_BRACE
     assert tokens[30].token_type == TokenType.IDENTIFIER
