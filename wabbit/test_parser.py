@@ -128,3 +128,8 @@ while true { print 2; }
         "While(condition=Boolean(value='true'),"
         + " body=Block(statements=[Print(expression=Integer(value='2'))]))"
     )
+
+    # program 9
+    statements = source_to_statements("1;")
+
+    assert str(statements[0]) == "Expression(expression=Integer(value='1'))"

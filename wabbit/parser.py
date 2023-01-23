@@ -13,6 +13,7 @@ from statement import (
     If,
     Block,
     While,
+    Expression,
 )
 
 
@@ -112,7 +113,7 @@ def statement(parser: Parser) -> Tuple[Parser, Statem]:
         parser, statements = block(parser)
         return parser, Block(statements)
 
-    raise ParseError()
+    return expression_statement(parser)
 
 
 def break_statement(parser: Parser) -> Tuple[Parser, Statem]:
@@ -174,6 +175,14 @@ def block(parser: Parser) -> Tuple[Parser, List[Statem]]:
     parser, _ = consume(parser, TokenType.RIGHT_BRACE, "Expect '}' after block.")
 
     return parser, statements
+
+
+def expression_statement(parser: Parser) -> Tuple[Parser, Statem]:
+    parser, individual_expression = expression(parser)
+
+    parser, _ = consume(parser, TokenType.SEMICOLON, "Expect ';' after expression.")
+
+    return parser, Expression(individual_expression)
 
 
 def expression(parser: Parser) -> Tuple[Parser, Expr]:
