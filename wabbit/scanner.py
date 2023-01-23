@@ -14,7 +14,18 @@ class TokenType(enum.Enum):
     SLASH = "SLASH"
 
     # One or two character tokens.
+    BANG = "BANG"
+    BANG_EQUAL = "BANG_EQUAL"
     EQUAL = "EQUAL"
+    EQUAL_EQUAL = "EQUAL_EQUAL"
+    GREATER = "GREATER"
+    GREATER_EQUAL = "GREATER_EQUAL"
+    LESS = "LESS"
+    LESS_EQUAL = "LESS_EQUAL"
+
+    # Two character tokens.
+    OR = "OR"
+    AND = "AND"
 
     # Literals.
     NUMBER = "NUMBER"
@@ -24,6 +35,8 @@ class TokenType(enum.Enum):
     PRINT = "PRINT"
     CONST = "CONST"
     VAR = "VAR"
+    TRUE = "TRUE"
+    FALSE = "FALSE"
 
     # Types
     BOOL = "BOOL"
@@ -37,6 +50,8 @@ keywords: Dict[str, TokenType] = {
     "print": TokenType.PRINT,
     "const": TokenType.CONST,
     "var": TokenType.VAR,
+    "true": TokenType.TRUE,
+    "false": TokenType.FALSE,
 }
 
 
@@ -91,7 +106,28 @@ def scan_token(scanner: Scanner) -> Scanner:
         scanner = add_token(scanner, TokenType.SLASH)
 
     elif character == "=":
-        scanner = add_token(scanner, TokenType.EQUAL)
+        scanner = add_token(
+            scanner,
+            TokenType.EQUAL_EQUAL if is_match(scanner, "=") else TokenType.EQUAL,
+        )
+    elif character == "!":
+        scanner = add_token(
+            scanner, TokenType.BANG_EQUAL if is_match(scanner, "=") else TokenType.BANG
+        )
+    elif character == "<":
+        scanner = add_token(
+            scanner,
+            TokenType.GREATER_EQUAL if is_match(scanner, "=") else TokenType.GREATER,
+        )
+    elif character == ">":
+        scanner = add_token(
+            scanner, TokenType.LESS_EQUAL if is_match(scanner, "=") else TokenType.LESS
+        )
+
+    elif character == "&" and is_match(scanner, "&"):
+        scanner = add_token(scanner, TokenType.AND)
+    elif character == "|" and is_match(scanner, "|"):
+        scanner = add_token(scanner, TokenType.OR)
 
     elif character == "\n":
         scanner.line += 1
@@ -119,15 +155,15 @@ def add_token(
     return scanner
 
 
-def current(scanner: Scanner) -> str:
-    return scanner.source[scanner.start : scanner.current]
-
-
-def advance(scanner) -> Tuple[Scanner, str]:
+def advance(scanner: Scanner) -> Tuple[Scanner, str]:
     character = scanner.source[scanner.current]
     scanner.current += 1
 
     return scanner, character
+
+
+def current(scanner: Scanner) -> str:
+    return scanner.source[scanner.start : scanner.current]
 
 
 def peek(scanner: Scanner) -> str:
@@ -154,6 +190,17 @@ def is_digit(character: str) -> bool:
 
 def is_alpha(character: str) -> bool:
     return "a" <= character <= "z" or "A" <= character <= "Z" or character == "_"
+
+
+def is_match(scanner: Scanner, expected: str) -> bool:
+    if is_at_end(scanner):
+        return False
+
+    elif scanner.source[scanner.current] != expected:
+        return False
+
+    scanner.current += 1
+    return True
 
 
 def number(scanner: Scanner) -> Scanner:
