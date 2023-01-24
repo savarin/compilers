@@ -13,6 +13,7 @@ from expression import (
     Type,
     Binary,
     Unary,
+    Logical,
 )
 from statement import (
     DeclarationEnum,
@@ -78,7 +79,7 @@ def variable_declaration(parser: Parser) -> Tuple[Parser, Statem]:
     parser, is_equal = match(parser, [TokenType.EQUAL])
 
     if is_equal:
-        parser, initializer = equality(parser)
+        parser, initializer = logic_or(parser)
 
     if declaration_enum == DeclarationEnum.CONST and not is_equal:
         raise ParseError("Require const to have a value.")
@@ -166,7 +167,7 @@ def while_statement(parser: Parser) -> Tuple[Parser, Statem]:
 
 
 def print_statement(parser: Parser) -> Tuple[Parser, Statem]:
-    parser, individual_expression = equality(parser)
+    parser, individual_expression = logic_or(parser)
 
     parser, _ = consume(
         parser, TokenType.SEMICOLON, "Expect ';' after print statement."
@@ -190,11 +191,27 @@ def block(parser: Parser) -> Tuple[Parser, List[Statem]]:
 
 
 def expression_statement(parser: Parser) -> Tuple[Parser, Statem]:
-    parser, individual_expression = equality(parser)
+    parser, individual_expression = logic_or(parser)
 
     parser, _ = consume(parser, TokenType.SEMICOLON, "Expect ';' after expression.")
 
     return parser, Expression(individual_expression)
+
+
+def logic_or(parser: Parser) -> Tuple[Parser, Expr]:
+    parser, equality_expression = equality(parser)
+
+    while True:
+        parser, is_or = match(parser, [TokenType.AND])
+
+        if not is_or:
+            break
+
+        operator = OperatorEnum(previous(parser).lexeme)
+        parser, right = equality(parser)
+        equality_expression = Logical(equality_expression, operator, right)
+
+    return parser, equality_expression
 
 
 def equality(parser: Parser) -> Tuple[Parser, Expr]:

@@ -89,6 +89,13 @@ class Grouping(Expr):
 
 
 @dataclasses.dataclass
+class Logical(Expr):
+    left: Expr
+    operator_enum: OperatorEnum
+    right: Expr
+
+
+@dataclasses.dataclass
 class Unary(Expr):
     operator_enum: OperatorEnum
     right: Expr

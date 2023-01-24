@@ -318,3 +318,25 @@ print a+b*c < d-e/f;
         + " operator_enum=<OperatorEnum.DIVIDE: '/'>,"
         + " right=Name(text='f')))))"
     )
+
+    # program 15
+    statements = source_to_statements(
+        """\
+print x && y;
+print a < b && c > d;
+    """
+    )
+    assert str(statements[0]) == (
+        "Print(expression=Logical(left=Name(text='x'),"
+        + " operator_enum=<OperatorEnum.AND: '&&'>,"
+        + " right=Name(text='y')))"
+    )
+    assert str(statements[1]) == (
+        "Print(expression=Logical(left=Binary(left=Name(text='a'),"
+        + " operator_enum=<OperatorEnum.LESS: '<'>,"
+        + " right=Name(text='b')),"
+        + " operator_enum=<OperatorEnum.AND: '&&'>,"
+        + " right=Binary(left=Name(text='c'),"
+        + " operator_enum=<OperatorEnum.GREATER: '>'>,"
+        + " right=Name(text='d'))))"
+    )
