@@ -364,3 +364,32 @@ print a && b || c && d;
         + " operator_enum=<OperatorEnum.AND: '&&'>,"
         + " right=Name(text='d'))))"
     )
+
+    # program 17
+    statements = source_to_statements(
+        """\
+print (1+2)*(3+4);
+print (1+2*(3+4))*5;
+    """
+    )
+
+    assert str(statements[0]) == (
+        "Print(expression=Binary(left=Grouping(expression=Binary(left=Integer(value='1'),"
+        + " operator_enum=<OperatorEnum.PLUS: '+'>,"
+        + " right=Integer(value='2'))),"
+        + " operator_enum=<OperatorEnum.TIMES: '*'>,"
+        + " right=Grouping(expression=Binary(left=Integer(value='3'),"
+        + " operator_enum=<OperatorEnum.PLUS: '+'>,"
+        + " right=Integer(value='4')))))"
+    )
+    assert str(statements[1]) == (
+        "Print(expression=Binary(left=Grouping(expression=Binary(left=Integer(value='1'),"
+        + " operator_enum=<OperatorEnum.PLUS: '+'>,"
+        + " right=Binary(left=Integer(value='2'),"
+        + " operator_enum=<OperatorEnum.TIMES: '*'>,"
+        + " right=Grouping(expression=Binary(left=Integer(value='3'),"
+        + " operator_enum=<OperatorEnum.PLUS: '+'>,"
+        + " right=Integer(value='4')))))),"
+        + " operator_enum=<OperatorEnum.TIMES: '*'>,"
+        + " right=Integer(value='5')))"
+    )

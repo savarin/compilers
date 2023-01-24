@@ -14,6 +14,7 @@ from expression import (
     Binary,
     Unary,
     Logical,
+    Grouping,
 )
 from statement import (
     DeclarationEnum,
@@ -79,7 +80,7 @@ def variable_declaration(parser: Parser) -> Tuple[Parser, Statem]:
     parser, is_equal = match(parser, [TokenType.EQUAL])
 
     if is_equal:
-        parser, initializer = logic_or(parser)
+        parser, initializer = expression(parser)
 
     if declaration_enum == DeclarationEnum.CONST and not is_equal:
         raise ParseError("Require const to have a value.")
@@ -167,7 +168,7 @@ def while_statement(parser: Parser) -> Tuple[Parser, Statem]:
 
 
 def print_statement(parser: Parser) -> Tuple[Parser, Statem]:
-    parser, individual_expression = logic_or(parser)
+    parser, individual_expression = expression(parser)
 
     parser, _ = consume(
         parser, TokenType.SEMICOLON, "Expect ';' after print statement."
@@ -191,11 +192,15 @@ def block(parser: Parser) -> Tuple[Parser, List[Statem]]:
 
 
 def expression_statement(parser: Parser) -> Tuple[Parser, Statem]:
-    parser, individual_expression = logic_or(parser)
+    parser, individual_expression = expression(parser)
 
     parser, _ = consume(parser, TokenType.SEMICOLON, "Expect ';' after expression.")
 
     return parser, Expression(individual_expression)
+
+
+def expression(parser: Parser) -> Tuple[Parser, Expr]:
+    return logic_or(parser)
 
 
 def logic_or(parser: Parser) -> Tuple[Parser, Expr]:
@@ -319,17 +324,33 @@ def unary(parser: Parser) -> Tuple[Parser, Expr]:
 
 
 def primary(parser: Parser) -> Tuple[Parser, Expr]:
-    parser, token = advance(parser)
+    parser, is_number = match(parser, [TokenType.NUMBER])
 
-    if token.token_type == TokenType.NUMBER:
-        return parser, Float(token.lexeme) if "." in token.lexeme else Integer(
-            token.lexeme
+    if is_number:
+        value = previous(parser).lexeme
+        return parser, Float(value) if "." in value else Integer(value)
+
+    parser, is_boolean = match(parser, [TokenType.TRUE, TokenType.FALSE])
+
+    if is_boolean:
+        return parser, Boolean(previous(parser).lexeme)
+
+    parser, is_identifier = match(parser, [TokenType.IDENTIFIER])
+
+    if is_identifier:
+        return parser, Name(previous(parser).lexeme)
+
+    parser, is_parenthesis = match(parser, [TokenType.LEFT_PAREN])
+
+    if is_parenthesis:
+        parser, parenthesis_expression = expression(parser)
+        parser, _ = consume(
+            parser, TokenType.RIGHT_PAREN, "Expect ')' after expression."
         )
 
-    elif token.token_type in [TokenType.TRUE, TokenType.FALSE]:
-        return parser, Boolean(token.lexeme)
+        return parser, Grouping(parenthesis_expression)
 
-    return parser, Name(token.lexeme)
+    raise error(parser, peek(parser), "Expect expression.")
 
 
 def match(parser: Parser, token_types: List[TokenType]) -> Tuple[Parser, bool]:
@@ -370,6 +391,11 @@ def peek(parser: Parser) -> Token:
 
 def previous(parser: Parser) -> Token:
     return parser.tokens[parser.current - 1]
+
+
+def error(parser: Parser, token: Token, message: str) -> ParseError:
+    print(f"Error at TokenType.{token.token_type.name} in line {token.line}: {message}")
+    return ParseError()
 
 
 def is_at_end(parser: Parser) -> bool:
