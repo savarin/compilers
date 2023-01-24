@@ -16,6 +16,7 @@ class OperatorEnum(enum.Enum):
     DIVIDE = "/"
     EQUAL = "="
     EQUAL_EQUAL = "=="
+    BANG_EQUAL = "!="
     LESS = "<"
     LESS_EQUAL = "<="
     GREATER = ">"

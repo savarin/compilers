@@ -78,7 +78,7 @@ def variable_declaration(parser: Parser) -> Tuple[Parser, Statem]:
     parser, is_equal = match(parser, [TokenType.EQUAL])
 
     if is_equal:
-        parser, initializer = term(parser)
+        parser, initializer = equality(parser)
 
     if declaration_enum == DeclarationEnum.CONST and not is_equal:
         raise ParseError("Require const to have a value.")
@@ -166,7 +166,7 @@ def while_statement(parser: Parser) -> Tuple[Parser, Statem]:
 
 
 def print_statement(parser: Parser) -> Tuple[Parser, Statem]:
-    parser, individual_expression = term(parser)
+    parser, individual_expression = equality(parser)
 
     parser, _ = consume(
         parser, TokenType.SEMICOLON, "Expect ';' after print statement."
@@ -190,11 +190,53 @@ def block(parser: Parser) -> Tuple[Parser, List[Statem]]:
 
 
 def expression_statement(parser: Parser) -> Tuple[Parser, Statem]:
-    parser, individual_expression = term(parser)
+    parser, individual_expression = equality(parser)
 
     parser, _ = consume(parser, TokenType.SEMICOLON, "Expect ';' after expression.")
 
     return parser, Expression(individual_expression)
+
+
+def equality(parser: Parser) -> Tuple[Parser, Expr]:
+    parser, comparison_expression = comparison(parser)
+
+    while True:
+        parser, is_equality = match(
+            parser, [TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL]
+        )
+
+        if not is_equality:
+            break
+
+        operator = OperatorEnum(previous(parser).lexeme)
+        parser, right = comparison(parser)
+        comparison_expression = Binary(comparison_expression, operator, right)
+
+    return parser, comparison_expression
+
+
+def comparison(parser: Parser) -> Tuple[Parser, Expr]:
+    parser, term_expression = term(parser)
+
+    while True:
+        parser, is_comparison = match(
+            parser,
+            [
+                TokenType.GREATER,
+                TokenType.GREATER_EQUAL,
+                TokenType.LESS,
+                TokenType.LESS_EQUAL,
+            ],
+        )
+
+        if not is_comparison:
+            break
+
+        operator = OperatorEnum(previous(parser).lexeme)
+        parser, right = term(parser)
+        term_expression = Binary(term_expression, operator, right)
+
+    return parser, term_expression
 
 
 def term(parser: Parser) -> Tuple[Parser, Expr]:

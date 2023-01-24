@@ -266,3 +266,55 @@ print 3*4 + 5;
         + " operator_enum=<OperatorEnum.PLUS: '+'>,"
         + " right=Integer(value='5')))"
     )
+
+    # program 14
+    statements = source_to_statements(
+        """\
+print 2 <= 3;
+print 2 > 3;
+print 2 >= 3;
+print 2 == 3;
+print 2 != 3;
+print a+b*c < d-e/f;
+    """
+    )
+
+    assert str(statements[0]) == (
+        "Print(expression=Binary(left=Integer(value='2'),"
+        + " operator_enum=<OperatorEnum.LESS_EQUAL: '<='>,"
+        + " right=Integer(value='3')))"
+    )
+    assert str(statements[1]) == (
+        "Print(expression=Binary(left=Integer(value='2'),"
+        + " operator_enum=<OperatorEnum.GREATER: '>'>,"
+        + " right=Integer(value='3')))"
+    )
+    assert str(statements[2]) == (
+        "Print(expression=Binary(left=Integer(value='2'),"
+        + " operator_enum=<OperatorEnum.GREATER_EQUAL: '>='>,"
+        + " right=Integer(value='3')))"
+    )
+
+    assert str(statements[3]) == (
+        "Print(expression=Binary(left=Integer(value='2'),"
+        + " operator_enum=<OperatorEnum.EQUAL_EQUAL: '=='>,"
+        + " right=Integer(value='3')))"
+    )
+    assert str(statements[4]) == (
+        "Print(expression=Binary(left=Integer(value='2'),"
+        + " operator_enum=<OperatorEnum.BANG_EQUAL: '!='>,"
+        + " right=Integer(value='3')))"
+    )
+    assert str(statements[5]) == (
+        "Print(expression=Binary(left=Binary(left=Name(text='a'),"
+        + " operator_enum=<OperatorEnum.PLUS: '+'>,"
+        + " right=Binary(left=Name(text='b'),"
+        + " operator_enum=<OperatorEnum.TIMES: '*'>,"
+        + " right=Name(text='c'))),"
+        + " operator_enum=<OperatorEnum.LESS: '<'>,"
+        + " right=Binary(left=Name(text='d'),"
+        + " operator_enum=<OperatorEnum.MINUS: '-'>,"
+        + " right=Binary(left=Name(text='e'),"
+        + " operator_enum=<OperatorEnum.DIVIDE: '/'>,"
+        + " right=Name(text='f')))))"
+    )
