@@ -326,6 +326,7 @@ print x && y;
 print a < b && c > d;
     """
     )
+
     assert str(statements[0]) == (
         "Print(expression=Logical(left=Name(text='x'),"
         + " operator_enum=<OperatorEnum.AND: '&&'>,"
@@ -338,5 +339,28 @@ print a < b && c > d;
         + " operator_enum=<OperatorEnum.AND: '&&'>,"
         + " right=Binary(left=Name(text='c'),"
         + " operator_enum=<OperatorEnum.GREATER: '>'>,"
+        + " right=Name(text='d'))))"
+    )
+
+    # program 16
+    statements = source_to_statements(
+        """\
+print x || y;
+print a && b || c && d;
+    """
+    )
+
+    assert str(statements[0]) == (
+        "Print(expression=Logical(left=Name(text='x'),"
+        + " operator_enum=<OperatorEnum.OR: '||'>,"
+        + " right=Name(text='y')))"
+    )
+    assert str(statements[1]) == (
+        "Print(expression=Logical(left=Logical(left=Name(text='a'),"
+        + " operator_enum=<OperatorEnum.AND: '&&'>,"
+        + " right=Name(text='b')),"
+        + " operator_enum=<OperatorEnum.OR: '||'>,"
+        + " right=Logical(left=Name(text='c'),"
+        + " operator_enum=<OperatorEnum.AND: '&&'>,"
         + " right=Name(text='d'))))"
     )

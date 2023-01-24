@@ -199,12 +199,28 @@ def expression_statement(parser: Parser) -> Tuple[Parser, Statem]:
 
 
 def logic_or(parser: Parser) -> Tuple[Parser, Expr]:
+    parser, and_expression = logic_and(parser)
+
+    while True:
+        parser, is_or = match(parser, [TokenType.OR])
+
+        if not is_or:
+            break
+
+        operator = OperatorEnum(previous(parser).lexeme)
+        parser, right = logic_and(parser)
+        and_expression = Logical(and_expression, operator, right)
+
+    return parser, and_expression
+
+
+def logic_and(parser: Parser) -> Tuple[Parser, Expr]:
     parser, equality_expression = equality(parser)
 
     while True:
-        parser, is_or = match(parser, [TokenType.AND])
+        parser, is_and = match(parser, [TokenType.AND])
 
-        if not is_or:
+        if not is_and:
             break
 
         operator = OperatorEnum(previous(parser).lexeme)
@@ -289,8 +305,6 @@ def factor(parser: Parser) -> Tuple[Parser, Expr]:
 
 
 def unary(parser: Parser) -> Tuple[Parser, Expr]:
-    # parser, primary_expression = primary(parser)
-
     while True:
         parser, is_unary = match(parser, [TokenType.PLUS, TokenType.MINUS])
 
