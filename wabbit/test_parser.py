@@ -393,3 +393,37 @@ print (1+2*(3+4))*5;
         + " operator_enum=<OperatorEnum.TIMES: '*'>,"
         + " right=Integer(value='5')))"
     )
+
+    # program 18
+    statements = source_to_statements(
+        """\
+x = 1;
+print x = 1;
+while (n = n + 1) < 10 {
+   print n;
+}
+x = y = 2;
+    """
+    )
+
+    assert str(statements[0]) == (
+        "Expression(expression=Assign(name=Name(text='x'),"
+        + " value=Integer(value='1')))"
+    )
+    assert str(statements[1]) == (
+        "Print(expression=Assign(name=Name(text='x')," + " value=Integer(value='1')))"
+    )
+    assert str(statements[2]) == (
+        "While(condition=Binary(left=Grouping(expression=Assign(name=Name(text='n'),"
+        + " value=Binary(left=Name(text='n'),"
+        + " operator_enum=<OperatorEnum.PLUS: '+'>,"
+        + " right=Integer(value='1')))),"
+        + " operator_enum=<OperatorEnum.LESS: '<'>,"
+        + " right=Integer(value='10')),"
+        + " body=Block(statements=[Print(expression=Name(text='n'))]))"
+    )
+    assert str(statements[3]) == (
+        "Expression(expression=Assign(name=Name(text='x'),"
+        + " value=Assign(name=Name(text='y'),"
+        + " value=Integer(value='2'))))"
+    )

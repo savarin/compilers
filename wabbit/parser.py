@@ -15,6 +15,7 @@ from expression import (
     Unary,
     Logical,
     Grouping,
+    Assign,
 )
 from statement import (
     DeclarationEnum,
@@ -146,7 +147,7 @@ def continue_statement(parser: Parser) -> Tuple[Parser, Statem]:
 
 
 def if_statement(parser: Parser) -> Tuple[Parser, Statem]:
-    parser, _ = consume(parser, TokenType.TRUE, "Expect 'true' after 'if'.")
+    parser, condition = expression(parser)
 
     parser, then_branch = statement(parser)
 
@@ -156,15 +157,15 @@ def if_statement(parser: Parser) -> Tuple[Parser, Statem]:
     if is_then:
         parser, else_branch = statement(parser)
 
-    return parser, If(Boolean("true"), then_branch, else_branch)
+    return parser, If(condition, then_branch, else_branch)
 
 
 def while_statement(parser: Parser) -> Tuple[Parser, Statem]:
-    parser, _ = consume(parser, TokenType.TRUE, "Expect 'true' after 'if'.")
+    parser, condition = expression(parser)
 
     parser, body = statement(parser)
 
-    return parser, While(Boolean("true"), body)
+    return parser, While(condition, body)
 
 
 def print_statement(parser: Parser) -> Tuple[Parser, Statem]:
@@ -200,7 +201,23 @@ def expression_statement(parser: Parser) -> Tuple[Parser, Statem]:
 
 
 def expression(parser: Parser) -> Tuple[Parser, Expr]:
-    return logic_or(parser)
+    return assignment(parser)
+
+
+def assignment(parser: Parser) -> Tuple[Parser, Expr]:
+    parser, or_expression = logic_or(parser)
+    parser, is_equal = match(parser, [TokenType.EQUAL])
+
+    if is_equal:
+        equals = previous(parser)
+        parser, value = assignment(parser)
+
+        if isinstance(or_expression, Name):
+            return parser, Assign(or_expression, value)
+
+        raise error(parser, equals, "Invalid assignment target.")
+
+    return parser, or_expression
 
 
 def logic_or(parser: Parser) -> Tuple[Parser, Expr]:
