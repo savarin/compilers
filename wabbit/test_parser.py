@@ -427,3 +427,33 @@ x = y = 2;
         + " value=Assign(name=Name(text='y'),"
         + " value=Integer(value='2'))))"
     )
+
+    # program 19
+    statements = source_to_statements(
+        """\
+func add(x int, y int) int {
+     return x + y;
+}
+
+print add(2, 3+4);
+    """
+    )
+
+    assert str(statements[0]) == (
+        "Function(name=Name(text='add'),"
+        + " parameter_names=[Name(text='x'),"
+        + " Name(text='y')],"
+        + " parameter_types=[Type(type_enum=<TypeEnum.INT: 'INT'>),"
+        + " Type(type_enum=<TypeEnum.INT: 'INT'>)],"
+        + " return_type=Type(type_enum=<TypeEnum.INT: 'INT'>),"
+        + " body=Block(statements=[Return(expression=Binary(left=Name(text='x'),"
+        + " operator_enum=<OperatorEnum.PLUS: '+'>,"
+        + " right=Name(text='y')))]))"
+    )
+    assert str(statements[1]) == (
+        "Print(expression=Call(callee=Name(text='add'),"
+        + " arguments=[Integer(value='2'),"
+        + " Binary(left=Integer(value='3'),"
+        + " operator_enum=<OperatorEnum.PLUS: '+'>,"
+        + " right=Integer(value='4'))]))"
+    )

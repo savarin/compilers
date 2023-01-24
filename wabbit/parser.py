@@ -16,6 +16,7 @@ from expression import (
     Logical,
     Grouping,
     Assign,
+    Call,
 )
 from statement import (
     DeclarationEnum,
@@ -28,6 +29,8 @@ from statement import (
     Block,
     While,
     Expression,
+    Function,
+    Return,
 )
 
 
@@ -56,12 +59,68 @@ def parse(parser: Parser) -> List[Statem]:
 
 
 def declaration(parser: Parser) -> Tuple[Parser, Statem]:
+    parser, is_function = match(parser, [TokenType.FUNCTION])
+
+    if is_function:
+        return function(parser)
+
     parser, is_variable = match(parser, [TokenType.CONST, TokenType.VAR])
 
     if is_variable:
         return variable_declaration(parser)
 
     return statement(parser)
+
+
+def function(parser: Parser) -> Tuple[Parser, Statem]:
+    parser, name = consume(parser, TokenType.IDENTIFIER, "Expect function name.")
+
+    parser, _ = consume(parser, TokenType.LEFT_PAREN, "Expect '(' after function name.")
+
+    parameter_names: List[Name] = []
+    parameter_types: List[Type] = []
+
+    if not expect(parser, TokenType.RIGHT_PAREN):
+        while True:
+            parser, parameter_name = consume(
+                parser, TokenType.IDENTIFIER, "Expect parameter name."
+            )
+            parameter_names.append(Name(parameter_name.lexeme))
+
+            parser, parameter_type = advance(parser)
+
+            if parameter_type.token_type not in [
+                TokenType.BOOL,
+                TokenType.INT,
+                TokenType.FLOAT,
+            ]:
+                raise ParseError("Expect parameter type.")
+
+            parameter_types.append(Type(TypeEnum(parameter_type.token_type.value)))
+
+            parser, is_comma = match(parser, [TokenType.COMMA])
+
+            if not is_comma:
+                break
+
+    parser, _ = consume(parser, TokenType.RIGHT_PAREN, "Expect ')' after parameters.")
+
+    parser, return_type = advance(parser)
+
+    if return_type.token_type not in [TokenType.BOOL, TokenType.INT, TokenType.FLOAT]:
+        raise ParseError("Expect return type.")
+
+    parser, _ = consume(parser, TokenType.LEFT_BRACE, "Expect '{' before body.")
+
+    parser, body = block(parser)
+
+    return parser, Function(
+        Name(name.lexeme),
+        parameter_names,
+        parameter_types,
+        Type(TypeEnum(return_type.token_type.value)),
+        Block(body),
+    )
 
 
 def variable_declaration(parser: Parser) -> Tuple[Parser, Statem]:
@@ -121,6 +180,11 @@ def statement(parser: Parser) -> Tuple[Parser, Statem]:
     if is_print:
         return print_statement(parser)
 
+    parser, is_return = match(parser, [TokenType.RETURN])
+
+    if is_return:
+        return return_statement(parser)
+
     parser, is_block = match(parser, [TokenType.LEFT_BRACE])
 
     if is_block:
@@ -176,6 +240,14 @@ def print_statement(parser: Parser) -> Tuple[Parser, Statem]:
     )
 
     return parser, Print(individual_expression)
+
+
+def return_statement(parser: Parser) -> Tuple[Parser, Statem]:
+    parser, value = expression(parser)
+
+    parser, _ = consume(parser, TokenType.SEMICOLON, "Expect ';' after return value.")
+
+    return parser, Return(value)
 
 
 def block(parser: Parser) -> Tuple[Parser, List[Statem]]:
@@ -337,7 +409,39 @@ def unary(parser: Parser) -> Tuple[Parser, Expr]:
         parser, right = unary(parser)
         return parser, Unary(operator, right)
 
-    return primary(parser)
+    return call(parser)
+
+
+def call(parser: Parser) -> Tuple[Parser, Expr]:
+    parser, primary_expression = primary(parser)
+
+    while True:
+        parser, is_parenthesis = match(parser, [TokenType.LEFT_PAREN])
+
+        if not is_parenthesis:
+            break
+
+        parser, primary_expression = finish(parser, primary_expression)
+
+    return parser, primary_expression
+
+
+def finish(parser: Parser, callee: Expr) -> Tuple[Parser, Expr]:
+    arguments: List[Expr] = []
+
+    if not expect(parser, TokenType.RIGHT_PAREN):
+        while True:
+            parser, individual_expression = expression(parser)
+            arguments.append(individual_expression)
+
+            parser, is_comma = match(parser, [TokenType.COMMA])
+
+            if not is_comma:
+                break
+
+    parser, _ = consume(parser, TokenType.RIGHT_PAREN, "Expect ')' after arguments.")
+
+    return parser, Call(callee, arguments)
 
 
 def primary(parser: Parser) -> Tuple[Parser, Expr]:
